@@ -1,8 +1,8 @@
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cl.duoc.app.signosvitales.model.EstadoSalud
-import cl.duoc.app.signosvitales.model.SignoVital
-import cl.duoc.app.signosvitales.model.TipoSignoVital
+import cl.duoc.app.model.EstadoSalud
+import cl.duoc.app.model.SignoVital
+import cl.duoc.app.model.TipoSignoVital
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

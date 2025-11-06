@@ -1,4 +1,4 @@
-package cl.duoc.app.signosvitales.model
+package cl.duoc.app.model
 
 import java.util.Date
 
