@@ -61,16 +61,45 @@ enum class ReservationStatus {
  * @property bloodPressureSystolic Presión arterial sistólica
  * @property bloodPressureDiastolic Presión arterial diastólica
  * @property oxygenSaturation Saturación de oxígeno (%)
+ * @property temperature Temperatura corporal (°C)
+ * @property notes Notas adicionales
  * @property timestamp Momento del registro
  */
 data class VitalSigns(
     val id: String,
     val userId: String,
-    val heartRate: Int,
-    val bloodPressureSystolic: Int,
-    val bloodPressureDiastolic: Int,
-    val oxygenSaturation: Int,
+    val heartRate: Int?,
+    val bloodPressureSystolic: Int?,
+    val bloodPressureDiastolic: Int?,
+    val oxygenSaturation: Int?,
+    val temperature: Double? = null,
+    val notes: String? = null,
     val timestamp: Long = System.currentTimeMillis()
+)
+
+/**
+ * Entidad de dominio que representa una Alerta médica
+ * 
+ * @property id Identificador único de la alerta
+ * @property userId ID del usuario al que pertenece
+ * @property title Título de la alerta
+ * @property message Mensaje descriptivo
+ * @property severity Nivel de severidad (Crítico, Alto, Medio, Bajo)
+ * @property type Tipo de alerta (Signos Vitales, Medicamento, Cita, etc.)
+ * @property isRead Si la alerta ha sido leída
+ * @property timestamp Momento de creación de la alerta
+ * @property relatedId ID relacionado (ej: ID de signos vitales)
+ */
+data class Alert(
+    val id: String,
+    val userId: String,
+    val title: String,
+    val message: String,
+    val severity: String, // Crítico, Alto, Medio, Bajo
+    val type: String, // Signos Vitales, Medicamento, Cita, Sistema
+    val isRead: Boolean = false,
+    val timestamp: Long = System.currentTimeMillis(),
+    val relatedId: String? = null
 )
 
 /**
@@ -81,3 +110,4 @@ enum class RiskLevel {
     WARNING,
     DANGER
 }
+
