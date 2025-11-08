@@ -2,6 +2,7 @@ package cl.duoc.app.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cl.duoc.app.utils.FormatUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -133,8 +134,7 @@ class HomeViewModel : ViewModel() {
      * Obtiene la hora actual formateada
      */
     private fun getCurrentTime(): String {
-        return java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
-            .format(java.util.Date())
+        return FormatUtils.formatTime(System.currentTimeMillis())
     }
 
     /**

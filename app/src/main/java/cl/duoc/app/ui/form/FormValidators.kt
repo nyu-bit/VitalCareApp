@@ -1,5 +1,7 @@
 package cl.duoc.app.ui.form
 
+import cl.duoc.app.utils.Constants
+
 /**
  * Resultado de una validación
  * Puede ser exitoso o contener un mensaje de error
@@ -91,7 +93,7 @@ object FormValidators {
      * Valida que la contraseña cumpla requisitos de seguridad
      */
     fun password(
-        minLength: Int = 6,
+        minLength: Int = Constants.Validation.MIN_PASSWORD_LENGTH,
         requireUppercase: Boolean = false,
         requireLowercase: Boolean = false,
         requireDigit: Boolean = false,

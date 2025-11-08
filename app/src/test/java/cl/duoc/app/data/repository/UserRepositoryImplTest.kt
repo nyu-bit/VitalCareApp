@@ -1,6 +1,7 @@
 package cl.duoc.app.data.repository
 
 import cl.duoc.app.model.User
+import cl.duoc.app.utils.TestDataGenerator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -24,7 +25,7 @@ class UserRepositoryImplTest {
 
     @Test
     fun `saveUser stores user successfully`() = runTest {
-        val user = User(
+        val user = TestDataGenerator.generateTestUser(
             id = "1",
             name = "Juan Pérez",
             email = "juan@example.com",
@@ -37,7 +38,7 @@ class UserRepositoryImplTest {
 
     @Test
     fun `getUserById returns correct user`() = runTest {
-        val user = User(
+        val user = TestDataGenerator.generateTestUser(
             id = "1",
             name = "Juan Pérez",
             email = "juan@example.com"

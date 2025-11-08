@@ -1,0 +1,84 @@
+package cl.duoc.app.utils
+
+import kotlin.random.Random
+
+/**
+ * Utilidades para generación de datos de prueba
+ */
+object TestDataGenerator {
+    
+    /**
+     * Genera un ID único
+     */
+    fun generateId(): String {
+        return "id_${System.currentTimeMillis()}_${Random.nextInt(1000, 9999)}"
+    }
+    
+    /**
+     * Genera signos vitales aleatorios dentro de rangos realistas
+     */
+    fun generateRandomVitalSigns(
+        userId: String,
+        isHealthy: Boolean = true
+    ): cl.duoc.app.model.VitalSigns {
+        val (heartRate, systolic, diastolic, oxygen) = if (isHealthy) {
+            Triple(
+                Random.nextInt(60, 100),
+                Random.nextInt(110, 130),
+                Random.nextInt(70, 85)
+            ) to Random.nextInt(95, 100)
+        } else {
+            Triple(
+                Random.nextInt(120, 150),
+                Random.nextInt(150, 180),
+                Random.nextInt(95, 110)
+            ) to Random.nextInt(85, 94)
+        }
+        
+        return cl.duoc.app.model.VitalSigns(
+            id = generateId(),
+            userId = userId,
+            heartRate = heartRate,
+            bloodPressureSystolic = systolic,
+            bloodPressureDiastolic = diastolic,
+            oxygenSaturation = oxygen
+        )
+    }
+    
+    /**
+     * Genera un usuario de prueba
+     */
+    fun generateTestUser(
+        id: String = generateId(),
+        name: String = "Usuario ${Random.nextInt(1, 100)}",
+        email: String = "user${Random.nextInt(1, 1000)}@test.com"
+    ): cl.duoc.app.model.User {
+        return cl.duoc.app.model.User(
+            id = id,
+            name = name,
+            email = email,
+            phone = "9${Random.nextInt(10000000, 99999999)}",
+            createdAt = System.currentTimeMillis()
+        )
+    }
+    
+    /**
+     * Genera una reserva de prueba
+     */
+    fun generateTestReservation(
+        userId: String,
+        daysFromNow: Int = 7
+    ): cl.duoc.app.model.Reservation {
+        val specialties = listOf("Cardiología", "Neurología", "Pediatría", "Psiquiatría")
+        val doctors = listOf("Dr. Smith", "Dra. García", "Dr. López", "Dra. Martínez")
+        
+        return cl.duoc.app.model.Reservation(
+            id = generateId(),
+            userId = userId,
+            specialty = specialties.random(),
+            doctorName = doctors.random(),
+            date = System.currentTimeMillis() + (daysFromNow * 24 * 60 * 60 * 1000L),
+            status = cl.duoc.app.model.ReservationStatus.values().random()
+        )
+    }
+}
