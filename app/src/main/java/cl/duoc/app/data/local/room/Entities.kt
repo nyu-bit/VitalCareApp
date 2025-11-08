@@ -12,8 +12,11 @@ data class UserEntity(
     @PrimaryKey
     val id: String,
     val name: String,
-    val email: String,
-    val phone: String,
+    val email: String?,
+    val phone: String?,
+    val rut: String?,
+    val birthDate: String?,
+    val address: String?,
     val createdAt: Long
 )
 

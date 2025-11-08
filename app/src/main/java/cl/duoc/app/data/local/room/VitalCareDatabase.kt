@@ -20,7 +20,7 @@ import androidx.room.RoomDatabase
         ReservationEntity::class,
         VitalSignsEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class VitalCareDatabase : RoomDatabase() {

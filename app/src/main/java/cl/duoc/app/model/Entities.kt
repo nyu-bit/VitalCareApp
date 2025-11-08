@@ -6,14 +6,20 @@ package cl.duoc.app.model
  * @property id Identificador único del usuario
  * @property name Nombre completo del usuario
  * @property email Correo electrónico del usuario
- * @property phone Número de teléfono
+ * @property phone Número de teléfono (opcional)
+ * @property rut RUT del usuario (opcional)
+ * @property birthDate Fecha de nacimiento (opcional)
+ * @property address Dirección del usuario (opcional)
  * @property createdAt Fecha de creación de la cuenta
  */
 data class User(
     val id: String,
     val name: String,
-    val email: String,
-    val phone: String = "",
+    val email: String? = null,
+    val phone: String? = null,
+    val rut: String? = null,
+    val birthDate: String? = null,
+    val address: String? = null,
     val createdAt: Long = System.currentTimeMillis()
 )
 

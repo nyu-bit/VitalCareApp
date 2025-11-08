@@ -16,6 +16,9 @@ fun UserEntity.toDomain(): User {
         name = this.name,
         email = this.email,
         phone = this.phone,
+        rut = this.rut,
+        birthDate = this.birthDate,
+        address = this.address,
         createdAt = this.createdAt
     )
 }
@@ -29,6 +32,9 @@ fun User.toEntity(): UserEntity {
         name = this.name,
         email = this.email,
         phone = this.phone,
+        rut = this.rut,
+        birthDate = this.birthDate,
+        address = this.address,
         createdAt = this.createdAt
     )
 }
