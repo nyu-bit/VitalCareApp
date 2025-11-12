@@ -24,7 +24,9 @@ import androidx.compose.ui.unit.sp
  * Pantalla de inicio de sesión para VitalCare
  */
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    onLoginSuccess: () -> Unit = {}
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf("") }
@@ -75,7 +77,7 @@ fun LoginScreen() {
         // Si todo es válido, mostrar mensaje de bienvenida
         if (isValid) {
             Toast.makeText(context, "Bienvenido(a)", Toast.LENGTH_SHORT).show()
-            // TODO: Navegar al Dashboard
+            onLoginSuccess()
         }
     }
 
