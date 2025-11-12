@@ -1,6 +1,7 @@
 package cl.duoc.app
 
 import androidx.compose.runtime.*
+import cl.duoc.app.ui.dashboard.DashboardScreen
 import cl.duoc.app.ui.login.LoginScreen
 import cl.duoc.app.ui.profile.ProfileScreen
 
@@ -14,11 +15,12 @@ fun VitalCareApp() {
     
     when (currentScreen) {
         "login" -> LoginScreen(
-            onLoginSuccess = { currentScreen = "profile" }
+            onLoginSuccess = { currentScreen = "dashboard" }
         )
+        "dashboard" -> DashboardScreen()
         "profile" -> ProfileScreen()
         else -> LoginScreen(
-            onLoginSuccess = { currentScreen = "profile" }
+            onLoginSuccess = { currentScreen = "dashboard" }
         )
     }
 }
