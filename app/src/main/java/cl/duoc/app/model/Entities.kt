@@ -111,3 +111,23 @@ enum class RiskLevel {
     DANGER
 }
 
+/**
+ * Entidad de dominio que representa un Recordatorio de Cita
+ *
+ * @property id Identificador único del recordatorio
+ * @property reservationId ID de la reserva asociada
+ * @property userId ID del usuario
+ * @property reminderTime Tiempo en el que se debe enviar el recordatorio (timestamp)
+ * @property workerId ID del trabajo programado en WorkManager
+ * @property isNotified Si la notificación ya fue enviada
+ * @property createdAt Fecha de creación del recordatorio
+ */
+data class AppointmentReminder(
+    val id: String,
+    val reservationId: String,
+    val userId: String,
+    val reminderTime: Long, // 1 hora antes de la cita
+    val workerId: String? = null,
+    val isNotified: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis()
+)
