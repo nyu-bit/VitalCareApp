@@ -80,4 +80,20 @@ dependencies {
 
     // Notificaciones
     implementation(libs.androidx.core.notification)
-}
+
+    // Google Maps y Location Services
+    implementation(libs.play.services.location)
+    implementation(libs.play.services.maps)
+    implementation(libs.maps.compose)
+
+    // Room Database
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    annotationProcessor(libs.room.compiler)
+    kaptTest(libs.room.compiler)
+
+    // Accompanist Permissions
+    implementation(libs.accompanist.permissions)
+
+    // Gson
+    implementation(libs.gson)

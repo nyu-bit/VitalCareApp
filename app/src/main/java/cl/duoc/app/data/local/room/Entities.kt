@@ -50,3 +50,37 @@ data class VitalSignsEntity(
     val oxygenSaturation: Int,
     val timestamp: Long
 )
+
+/**
+ * Entidad Room para Evento SOS
+ * Representa la tabla de eventos SOS en la base de datos local
+ */
+@Entity(tableName = "sos_events")
+data class SOSEventEntity(
+    @PrimaryKey
+    val id: String,
+    val userId: String,
+    val latitude: Double,
+    val longitude: Double,
+    val accuracy: Float,
+    val timestamp: Long,
+    val status: String,
+    val tutorNotified: Boolean
+)
+
+/**
+ * Entidad Room para Centro de Salud
+ * Representa la tabla de centros de salud
+ */
+@Entity(tableName = "health_centers")
+data class HealthCenterEntity(
+    @PrimaryKey
+    val id: String,
+    val name: String,
+    val address: String,
+    val latitude: Double,
+    val longitude: Double,
+    val phone: String?,
+    val email: String?,
+    val schedule: String?
+)

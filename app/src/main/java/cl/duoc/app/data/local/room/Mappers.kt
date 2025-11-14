@@ -103,17 +103,91 @@ fun VitalSigns.toEntity(): VitalSignsEntity {
     return VitalSignsEntity(
         id = this.id,
         userId = this.userId,
-        heartRate = this.heartRate,
-        bloodPressureSystolic = this.bloodPressureSystolic,
-        bloodPressureDiastolic = this.bloodPressureDiastolic,
-        oxygenSaturation = this.oxygenSaturation,
+        heartRate = this.heartRate ?: 0,
+        bloodPressureSystolic = this.bloodPressureSystolic ?: 0,
+        bloodPressureDiastolic = this.bloodPressureDiastolic ?: 0,
+        oxygenSaturation = this.oxygenSaturation ?: 0,
         timestamp = this.timestamp
     )
 }
 
 /**
- * Convierte lista de VitalSignsEntity a lista de VitalSigns
+ * Convierte SOSEventEntity (Room) a SOSEvent (Dominio)
  */
-fun List<VitalSignsEntity>.toVitalSignsDomainList(): List<VitalSigns> {
+fun SOSEventEntity.toDomain(): SOSEvent {
+    return SOSEvent(
+        id = this.id,
+        userId = this.userId,
+        location = LocationData(
+            latitude = this.latitude,
+            longitude = this.longitude,
+            accuracy = this.accuracy,
+            timestamp = this.timestamp
+        ),
+        timestamp = this.timestamp,
+        status = this.status,
+        tutorNotified = this.tutorNotified
+    )
+}
+
+/**
+ * Convierte SOSEvent (Dominio) a SOSEventEntity (Room)
+ */
+fun SOSEvent.toEntity(): SOSEventEntity {
+    return SOSEventEntity(
+        id = this.id,
+        userId = this.userId,
+        latitude = this.location.latitude,
+        longitude = this.location.longitude,
+        accuracy = this.location.accuracy,
+        timestamp = this.timestamp,
+        status = this.status,
+        tutorNotified = this.tutorNotified
+    )
+}
+
+/**
+ * Convierte lista de SOSEventEntity a lista de SOSEvent
+ */
+fun List<SOSEventEntity>.toSOSEventDomainList(): List<SOSEvent> {
+    return this.map { it.toDomain() }
+}
+
+/**
+ * Convierte HealthCenterEntity (Room) a HealthCenter (Dominio)
+ */
+fun HealthCenterEntity.toDomain(): HealthCenter {
+    return HealthCenter(
+        id = this.id,
+        name = this.name,
+        address = this.address,
+        latitude = this.latitude,
+        longitude = this.longitude,
+        phone = this.phone,
+        email = this.email,
+        schedule = this.schedule
+    )
+}
+
+/**
+ * Convierte HealthCenter (Dominio) a HealthCenterEntity (Room)
+ */
+fun HealthCenter.toEntity(): HealthCenterEntity {
+    return HealthCenterEntity(
+        id = this.id,
+        name = this.name,
+        address = this.address,
+        latitude = this.latitude,
+        longitude = this.longitude,
+        phone = this.phone,
+        email = this.email,
+        schedule = this.schedule
+    )
+}
+
+/**
+ * Convierte lista de HealthCenterEntity a lista de HealthCenter
+ */
+fun List<HealthCenterEntity>.toHealthCenterDomainList(): List<HealthCenter> {
     return this.map { it.toDomain() }
 }
