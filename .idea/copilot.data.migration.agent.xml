@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AgentMigrationStateService">
+    <option name="pendingSessionIds">
+      <option value="c93a92ce-a6b4-4de2-8ec5-e025ed6349fc" />
+    </option>
+    <option name="pendingTurns">
+      <map>
+        <entry key="c93a92ce-a6b4-4de2-8ec5-e025ed6349fc">
+          <value>
+            <set>
+              <option value="2f42b9ab-fdea-49be-9c18-1c005c168476" />
+              <option value="8c273092-6fa8-4648-bf3f-37b83c5f7e03" />
+              <option value="1594361f-9ac0-4f8d-96cd-e86da6fc0773" />
+              <option value="bccb0ac3-07eb-4250-b8c7-743043b68259" />
+            </set>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <pendingWorkingSetItems>
+      <entry key="c93a92ce-a6b4-4de2-8ec5-e025ed6349fc">
+        <set>
+          <option value="file://$PROJECT_DIR$/gradle/libs.versions.toml" />
+          <option value="file://$PROJECT_DIR$/app/build.gradle.kts" />
+          <option value="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/cl/duoc/app/model/Entities.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/cl/duoc/app/domain/repository/ReminderRepository.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/cl/duoc/app/data/repository/ReminderRepositoryImpl.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/cl/duoc/app/data/notification/ReminderNotificationManager.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/cl/duoc/app/data/notification/AppointmentReminderWorker.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/cl/duoc/app/domain/usecase/ReminderUseCases.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/cl/duoc/app/ui/RemindersViewModel.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/cl/duoc/app/ui/reminders/RemindersScreen.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/cl/duoc/app/data/notification/README.md" />
+          <option value="file://$PROJECT_DIR$/REMINDERS_INTEGRATION_GUIDE.md" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/cl/duoc/app/utils/ReminderTestDataGenerator.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/cl/duoc/app/utils/TestDataGenerator.kt" />
+          <option value="file://$PROJECT_DIR$/IMPLEMENTATION_CHECKLIST.md" />
+          <option value="file://$PROJECT_DIR$/ARCHITECTURE_DIAGRAM.md" />
+          <option value="file://$PROJECT_DIR$/EXECUTIVE_SUMMARY.md" />
+          <option value="file://$PROJECT_DIR$/QUICK_START.md" />
+          <option value="file://$PROJECT_DIR$/DOCUMENTATION_INDEX.md" />
+          <option value="file://$PROJECT_DIR$/REMINDERS_MODULE_README.md" />
+          <option value="file://$PROJECT_DIR$/FINAL_SUMMARY.txt" />
+          <option value="file://$PROJECT_DIR$/START_HERE.txt" />
+        </set>
+      </entry>
+    </pendingWorkingSetItems>
+  </component>
+</project>

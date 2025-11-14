@@ -81,4 +81,41 @@ object TestDataGenerator {
             status = cl.duoc.app.model.ReservationStatus.values().random()
         )
     }
+
+    /**
+     * Genera un recordatorio de prueba para una reserva
+     */
+    fun generateTestReminder(
+        reservationId: String,
+        userId: String,
+        appointmentTimeMs: Long
+    ): cl.duoc.app.model.AppointmentReminder {
+        // Recordatorio 1 hora antes de la cita
+        val reminderTime = appointmentTimeMs - (60 * 60 * 1000)
+
+        return cl.duoc.app.model.AppointmentReminder(
+            id = generateId(),
+            reservationId = reservationId,
+            userId = userId,
+            reminderTime = reminderTime,
+            isNotified = false
+        )
+    }
+
+    /**
+     * Genera múltiples recordatorios de prueba
+     */
+    fun generateTestReminders(
+        userId: String,
+        count: Int = 3
+    ): List<cl.duoc.app.model.AppointmentReminder> {
+        return (1..count).map { i ->
+            val appointmentTime = System.currentTimeMillis() + (i * 3 * 60 * 60 * 1000L)
+            generateTestReminder(
+                reservationId = "res_test_$i",
+                userId = userId,
+                appointmentTimeMs = appointmentTime
+            )
+        }
+    }
 }

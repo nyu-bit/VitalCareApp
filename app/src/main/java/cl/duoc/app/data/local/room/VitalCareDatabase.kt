@@ -13,14 +13,18 @@ import androidx.room.RoomDatabase
  * @property userDao DAO para operaciones de usuarios
  * @property reservationDao DAO para operaciones de reservas
  * @property vitalSignsDao DAO para operaciones de signos vitales
+ * @property sosEventDao DAO para operaciones de eventos SOS
+ * @property healthCenterDao DAO para operaciones de centros de salud
  */
 @Database(
     entities = [
         UserEntity::class,
         ReservationEntity::class,
-        VitalSignsEntity::class
+        VitalSignsEntity::class,
+        SOSEventEntity::class,
+        HealthCenterEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class VitalCareDatabase : RoomDatabase() {
@@ -40,6 +44,16 @@ abstract class VitalCareDatabase : RoomDatabase() {
      */
     abstract fun vitalSignsDao(): VitalSignsDao
     
+    /**
+     * Proporciona acceso al DAO de eventos SOS
+     */
+    abstract fun sosEventDao(): SOSEventDao
+
+    /**
+     * Proporciona acceso al DAO de centros de salud
+     */
+    abstract fun healthCenterDao(): HealthCenterDao
+
     companion object {
         private const val DATABASE_NAME = "vital_care_database"
         

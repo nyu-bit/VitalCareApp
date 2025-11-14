@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.work.runtime.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -59,6 +60,7 @@ dependencies {
     implementation("androidx.compose.ui:ui:1.5.4")
     implementation("androidx.compose.ui:ui-tooling-preview:1.5.4")
     implementation("androidx.compose.material3:material3:1.1.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 
     // Para desarrollo y debugging
     debugImplementation("androidx.compose.ui:ui-tooling:1.5.4")
@@ -70,18 +72,28 @@ dependencies {
     // Opcional: Integration con ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
 
-    // Navigation con Compose
-    implementation("androidx.navigation:navigation-compose:2.8.4")
-    
-    // Animaciones
-    implementation("androidx.compose.animation:animation:1.7.5")
-    
-    // Accompanist para transiciones de navegación animadas
-    implementation("com.google.accompanist:accompanist-navigation-animation:0.36.0")
-    
-    // Lottie para animaciones
-    implementation("com.airbnb.android:lottie-compose:6.5.2")
-    
-    // Gson para SharedPreferences (si no está)
-    implementation("com.google.code.gson:gson:2.10.1")
-}
+    // Opcional: Navigation con Compose
+    implementation("androidx.navigation:navigation-compose:2.7.4")
+
+    // WorkManager para tareas en background
+    implementation(libs.androidx.work.runtime)
+
+    // Notificaciones
+    implementation(libs.androidx.core.notification)
+
+    // Google Maps y Location Services
+    implementation(libs.play.services.location)
+    implementation(libs.play.services.maps)
+    implementation(libs.maps.compose)
+
+    // Room Database
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    annotationProcessor(libs.room.compiler)
+    kaptTest(libs.room.compiler)
+
+    // Accompanist Permissions
+    implementation(libs.accompanist.permissions)
+
+    // Gson
+    implementation(libs.gson)

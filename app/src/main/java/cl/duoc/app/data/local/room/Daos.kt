@@ -199,10 +199,158 @@ interface VitalSignsDao {
      */
     @Query("DELETE FROM vital_signs WHERE userId = :userId")
     suspend fun deleteAllVitalSignsByUserId(userId: String)
-    
+
     /**
      * Elimina todos los registros
      */
     @Query("DELETE FROM vital_signs")
     suspend fun deleteAllVitalSigns()
+}
+
+/**
+ * DAO (Data Access Object) para operaciones de Evento SOS
+ * Define las consultas SQL para la tabla de eventos SOS
+ */
+@Dao
+interface SOSEventDao {
+
+    /**
+     * Obtiene todos los eventos SOS de un usuario ordenados por timestamp descendente
+     */
+    @Query("SELECT * FROM sos_events WHERE userId = :userId ORDER BY timestamp DESC")
+    suspend fun getSOSEventsByUserId(userId: String): List<SOSEventEntity>
+
+    /**
+     * Obtiene un evento SOS por ID
+     */
+    @Query("SELECT * FROM sos_events WHERE id = :eventId")
+    suspend fun getSOSEventById(eventId: String): SOSEventEntity?
+
+    /**
+     * Obtiene los últimos eventos SOS de un usuario
+     */
+    @Query("SELECT * FROM sos_events WHERE userId = :userId ORDER BY timestamp DESC LIMIT :limit")
+    suspend fun getLatestSOSEvents(userId: String, limit: Int): List<SOSEventEntity>
+
+    /**
+     * Obtiene eventos SOS no resuelte
+     */
+    @Query("SELECT * FROM sos_events WHERE userId = :userId AND status = 'TRIGGERED' ORDER BY timestamp DESC")
+    suspend fun getActiveSOSEvents(userId: String): List<SOSEventEntity>
+
+    /**
+     * Observa cambios en los eventos SOS de un usuario
+     */
+    @Query("SELECT * FROM sos_events WHERE userId = :userId ORDER BY timestamp DESC")
+    fun observeSOSEvents(userId: String): Flow<List<SOSEventEntity>>
+
+    /**
+     * Observa el último evento SOS
+     */
+    @Query("SELECT * FROM sos_events WHERE userId = :userId ORDER BY timestamp DESC LIMIT 1")
+    fun observeLatestSOSEvent(userId: String): Flow<SOSEventEntity?>
+
+    /**
+     * Inserta un evento SOS
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSOSEvent(event: SOSEventEntity)
+
+    /**
+     * Actualiza un evento SOS
+     */
+    @Update
+    suspend fun updateSOSEvent(event: SOSEventEntity)
+
+    /**
+     * Actualiza el estado de un evento SOS
+     */
+    @Query("UPDATE sos_events SET status = :status, tutorNotified = :tutorNotified WHERE id = :eventId")
+    suspend fun updateSOSEventStatus(eventId: String, status: String, tutorNotified: Boolean)
+
+    /**
+     * Elimina un evento SOS
+     */
+    @Delete
+    suspend fun deleteSOSEvent(event: SOSEventEntity)
+
+    /**
+     * Elimina un evento SOS por ID
+     */
+    @Query("DELETE FROM sos_events WHERE id = :eventId")
+    suspend fun deleteSOSEventById(eventId: String)
+
+    /**
+     * Elimina todos los eventos SOS de un usuario
+     */
+    @Query("DELETE FROM sos_events WHERE userId = :userId")
+    suspend fun deleteAllSOSEventsByUserId(userId: String)
+
+    /**
+     * Elimina todos los eventos SOS
+     */
+    @Query("DELETE FROM sos_events")
+    suspend fun deleteAllSOSEvents()
+}
+
+/**
+ * DAO (Data Access Object) para operaciones de Centro de Salud
+ * Define las consultas SQL para la tabla de centros de salud
+ */
+@Dao
+interface HealthCenterDao {
+
+    /**
+     * Obtiene todos los centros de salud
+     */
+    @Query("SELECT * FROM health_centers")
+    suspend fun getAllHealthCenters(): List<HealthCenterEntity>
+
+    /**
+     * Obtiene un centro de salud por ID
+     */
+    @Query("SELECT * FROM health_centers WHERE id = :centerId")
+    suspend fun getHealthCenterById(centerId: String): HealthCenterEntity?
+
+    /**
+     * Observa cambios en los centros de salud
+     */
+    @Query("SELECT * FROM health_centers")
+    fun observeHealthCenters(): Flow<List<HealthCenterEntity>>
+
+    /**
+     * Inserta un centro de salud
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertHealthCenter(center: HealthCenterEntity)
+
+    /**
+     * Inserta múltiples centros de salud
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertHealthCenters(centers: List<HealthCenterEntity>)
+
+    /**
+     * Actualiza un centro de salud
+     */
+    @Update
+    suspend fun updateHealthCenter(center: HealthCenterEntity)
+
+    /**
+     * Elimina un centro de salud
+     */
+    @Delete
+    suspend fun deleteHealthCenter(center: HealthCenterEntity)
+
+    /**
+     * Elimina un centro de salud por ID
+     */
+    @Query("DELETE FROM health_centers WHERE id = :centerId")
+    suspend fun deleteHealthCenterById(centerId: String)
+
+    /**
+     * Elimina todos los centros de salud
+     */
+    @Query("DELETE FROM health_centers")
+    suspend fun deleteAllHealthCenters()
 }

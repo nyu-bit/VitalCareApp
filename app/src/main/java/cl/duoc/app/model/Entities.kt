@@ -111,3 +111,80 @@ enum class RiskLevel {
     DANGER
 }
 
+/**
+ * Entidad de dominio que representa un Recordatorio de Cita
+ *
+ * @property id Identificador único del recordatorio
+ * @property reservationId ID de la reserva asociada
+ * @property userId ID del usuario
+ * @property reminderTime Tiempo en el que se debe enviar el recordatorio (timestamp)
+ * @property workerId ID del trabajo programado en WorkManager
+ * @property isNotified Si la notificación ya fue enviada
+ * @property createdAt Fecha de creación del recordatorio
+ */
+data class AppointmentReminder(
+    val id: String,
+    val reservationId: String,
+    val userId: String,
+    val reminderTime: Long, // 1 hora antes de la cita
+    val workerId: String? = null,
+    val isNotified: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+/**
+ * Entidad de dominio que representa una Ubicación geográfica
+ *
+ * @property latitude Latitud de la ubicación
+ * @property longitude Longitud de la ubicación
+ * @property accuracy Precisión de la ubicación en metros
+ * @property timestamp Momento en que se obtuvo la ubicación
+ */
+data class LocationData(
+    val latitude: Double,
+    val longitude: Double,
+    val accuracy: Float = 0f,
+    val timestamp: Long = System.currentTimeMillis()
+)
+
+/**
+ * Entidad de dominio que representa un Centro de Salud Mental
+ *
+ * @property id Identificador único del centro
+ * @property name Nombre del centro
+ * @property address Dirección física
+ * @property latitude Latitud del centro
+ * @property longitude Longitud del centro
+ * @property phone Teléfono de contacto
+ * @property email Correo de contacto
+ * @property schedule Horario de atención
+ */
+data class HealthCenter(
+    val id: String,
+    val name: String,
+    val address: String,
+    val latitude: Double,
+    val longitude: Double,
+    val phone: String? = null,
+    val email: String? = null,
+    val schedule: String? = null
+)
+
+/**
+ * Entidad de dominio que representa un Evento de SOS
+ *
+ * @property id Identificador único del evento
+ * @property userId ID del usuario que activó el SOS
+ * @property location Ubicación donde se activó el SOS
+ * @property timestamp Momento en que se activó el SOS
+ * @property status Estado del SOS (TRIGGERED, ACKNOWLEDGED, RESOLVED)
+ * @property tutorNotified Si se ha notificado al tutor
+ */
+data class SOSEvent(
+    val id: String,
+    val userId: String,
+    val location: LocationData,
+    val timestamp: Long = System.currentTimeMillis(),
+    val status: String = "TRIGGERED", // TRIGGERED, ACKNOWLEDGED, RESOLVED
+    val tutorNotified: Boolean = false
+)
