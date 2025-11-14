@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
+import java.util.Locale
 
 /**
  * Pantalla para visualizar la ubicación del paciente en un mapa (para tutores)
@@ -64,15 +65,18 @@ fun PatientLocationMapScreen(
                     )
                 }
                 uiState.patientLocation != null -> {
-                    PatientLocationMapContent(
-                        location = uiState.patientLocation,
-                        patientName = uiState.patientName,
-                        isSimulated = uiState.isSimulated,
-                        zoom = uiState.mapZoom,
-                        onZoomIn = { viewModel.zoomIn() },
-                        onZoomOut = { viewModel.zoomOut() },
-                        onCenterPatient = { viewModel.centerOnPatient() }
-                    )
+                    val patientLocation = uiState.patientLocation
+                    if (patientLocation != null) {
+                        PatientLocationMapContent(
+                            location = patientLocation,
+                            patientName = uiState.patientName,
+                            isSimulated = uiState.isSimulated,
+                            zoom = uiState.mapZoom,
+                            onZoomIn = { viewModel.zoomIn() },
+                            onZoomOut = { viewModel.zoomOut() },
+                            onCenterPatient = { viewModel.centerOnPatient() }
+                        )
+                    }
                 }
                 uiState.hasError -> {
                     Column(
@@ -98,9 +102,6 @@ fun PatientLocationMapScreen(
                     }
                 }
             }
-        }
-    }
-}
         }
     }
 }
@@ -227,13 +228,12 @@ fun PatientLocationInfoPanel(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Coordenadas: ${String.format("%.4f", location.latitude)}, " +
-                    "${String.format("%.4f", location.longitude)}",
+                text = "Coordenadas: ${String.format(Locale.US, "%.4f", location.latitude)}, ${String.format(Locale.US, "%.4f", location.longitude)}",
                 style = MaterialTheme.typography.bodySmall
             )
 
             Text(
-                text = "Precisión: ${String.format("%.1f", location.accuracy)} metros",
+                text = "Precisión: ${String.format(Locale.US, "%.1f", location.accuracy)} metros",
                 style = MaterialTheme.typography.bodySmall
             )
 
