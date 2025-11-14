@@ -70,6 +70,18 @@ dependencies {
     // Opcional: Integration con ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
 
-    // Opcional: Navigation con Compose
-    implementation("androidx.navigation:navigation-compose:2.7.4")
+    // Navigation con Compose
+    implementation("androidx.navigation:navigation-compose:2.8.4")
+    
+    // Animaciones
+    implementation("androidx.compose.animation:animation:1.7.5")
+    
+    // Accompanist para transiciones de navegación animadas
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.36.0")
+    
+    // Lottie para animaciones
+    implementation("com.airbnb.android:lottie-compose:6.5.2")
+    
+    // Gson para SharedPreferences (si no está)
+    implementation("com.google.code.gson:gson:2.10.1")
 }

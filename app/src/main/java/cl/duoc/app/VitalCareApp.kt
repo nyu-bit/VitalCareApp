@@ -1,26 +1,14 @@
 package cl.duoc.app
 
-import androidx.compose.runtime.*
-import cl.duoc.app.ui.dashboard.DashboardScreen
-import cl.duoc.app.ui.login.LoginScreen
-import cl.duoc.app.ui.profile.ProfileScreen
+import androidx.compose.runtime.Composable
+import cl.duoc.app.navigation.AnimatedNavGraph
 
 /**
  * Punto de entrada principal de la aplicación VitalCare
- * Maneja la navegación básica entre pantallas
+ * Maneja la navegación con animaciones
+ * HU-08: Animaciones visuales y transiciones suaves
  */
 @Composable
 fun VitalCareApp() {
-    var currentScreen by remember { mutableStateOf("login") }
-    
-    when (currentScreen) {
-        "login" -> LoginScreen(
-            onLoginSuccess = { currentScreen = "dashboard" }
-        )
-        "dashboard" -> DashboardScreen()
-        "profile" -> ProfileScreen()
-        else -> LoginScreen(
-            onLoginSuccess = { currentScreen = "dashboard" }
-        )
-    }
+    AnimatedNavGraph()
 }

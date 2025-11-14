@@ -10,7 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -19,6 +18,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cl.duoc.app.ui.components.AnimatedPrimaryButton
+import cl.duoc.app.ui.components.FieldError
 
 /**
  * Pantalla de inicio de sesión para VitalCare
@@ -120,9 +121,7 @@ fun LoginScreen(
                     placeholder = { Text("ejemplo@correo.com") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     isError = emailError.isNotEmpty(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 4.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -130,19 +129,11 @@ fun LoginScreen(
                     )
                 )
                 
-                // Mensaje de error del email
-                if (emailError.isNotEmpty()) {
-                    Text(
-                        text = emailError,
-                        color = Color.Red,
-                        fontSize = 12.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, bottom = 8.dp)
-                    )
-                } else {
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
+                // Mensaje de error del email con animación
+                FieldError(
+                    errorMessage = emailError,
+                    visible = emailError.isNotEmpty()
+                )
 
                 // Campo de contraseña
                 OutlinedTextField(
@@ -173,9 +164,7 @@ fun LoginScreen(
                             )
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 4.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -183,36 +172,20 @@ fun LoginScreen(
                     )
                 )
                 
-                // Mensaje de error de la contraseña
-                if (passwordError.isNotEmpty()) {
-                    Text(
-                        text = passwordError,
-                        color = Color.Red,
-                        fontSize = 12.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, bottom = 16.dp)
-                    )
-                } else {
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
+                // Mensaje de error de la contraseña con animación
+                FieldError(
+                    errorMessage = passwordError,
+                    visible = passwordError.isNotEmpty()
+                )
 
-                // Botón de inicio de sesión
-                Button(
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Botón de inicio de sesión con animación
+                AnimatedPrimaryButton(
+                    text = "Iniciar Sesión",
                     onClick = { validateAndLogin() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Text(
-                        text = "Iniciar Sesión",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
+                    modifier = Modifier.fillMaxWidth()
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 

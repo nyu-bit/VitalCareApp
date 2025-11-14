@@ -1,6 +1,9 @@
 package cl.duoc.app.ui.dashboard
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -18,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cl.duoc.app.ui.animations.LottieHeartbeat
+import kotlinx.coroutines.delay
 import kotlin.random.Random
 
 /**
@@ -43,14 +48,26 @@ data class VitalSignData(
 /**
  * Pantalla de Dashboard principal
  * HU-11: Visualización de signos vitales del paciente
+ * HU-08: Con animaciones visuales
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen() {
+fun DashboardScreen(
+    onNavigateToProfile: () -> Unit = {}
+) {
     val context = LocalContext.current
     
     // Generar signos vitales simulados
     val vitalSigns = remember { generateSimulatedVitalSigns() }
+    
+    // Estado para controlar la visibilidad de las tarjetas con animación
+    var cardsVisible by remember { mutableStateOf(false) }
+    
+    // Animar la aparición de las tarjetas al entrar
+    LaunchedEffect(Unit) {
+        delay(100) // Pequeño delay para una mejor experiencia
+        cardsVisible = true
+    }
     
     MaterialTheme {
         Scaffold(
@@ -77,6 +94,18 @@ fun DashboardScreen() {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Animación Lottie en la parte superior
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LottieHeartbeat(
+                        modifier = Modifier.size(100.dp)
+                    )
+                }
+                
                 // Encabezado
                 Text(
                     text = "Estado General del Paciente",
@@ -93,18 +122,24 @@ fun DashboardScreen() {
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 
-                // Tarjetas de signos vitales
-                vitalSigns.forEach { vitalSign ->
-                    VitalSignCard(
-                        vitalSignData = vitalSign,
-                        onClick = {
-                            Toast.makeText(
-                                context,
-                                "Detalle de ${vitalSign.title}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    )
+                // Tarjetas de signos vitales con animación
+                vitalSigns.forEachIndexed { index, vitalSign ->
+                    AnimatedVisibility(
+                        visible = cardsVisible,
+                        enter = fadeIn() + expandVertically(),
+                        modifier = Modifier.animateEnterExit()
+                    ) {
+                        VitalSignCard(
+                            vitalSignData = vitalSign,
+                            onClick = {
+                                Toast.makeText(
+                                    context,
+                                    "Detalle de ${vitalSign.title}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        )
+                    }
                 }
                 
                 // Información adicional
