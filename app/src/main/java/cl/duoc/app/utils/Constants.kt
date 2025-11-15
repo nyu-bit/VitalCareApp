@@ -56,6 +56,28 @@ object Constants {
         const val CRITICAL = "Crítico"
     }
 
+    // ========== Alertas de Anomalías ==========
+    object AnomalyDetection {
+        // Umbrales de alerta
+        const val ALERT_PRIORITY_HIGH = "Alta"
+        const val ALERT_PRIORITY_MEDIUM = "Media"
+        const val ALERT_PRIORITY_LOW = "Baja"
+        
+        // Tipos de anomalía
+        const val ANOMALY_TYPE_PRESSURE_HIGH = "Presión arterial alta"
+        const val ANOMALY_TYPE_PRESSURE_LOW = "Presión arterial baja"
+        const val ANOMALY_TYPE_HEART_RATE_HIGH = "Frecuencia cardíaca alta"
+        const val ANOMALY_TYPE_HEART_RATE_LOW = "Frecuencia cardíaca baja"
+        const val ANOMALY_TYPE_OXYGEN_LOW = "Saturación de oxígeno baja"
+        const val ANOMALY_TYPE_TEMPERATURE_HIGH = "Temperatura alta"
+        const val ANOMALY_TYPE_TEMPERATURE_LOW = "Temperatura baja"
+        
+        // Canales de notificación
+        const val NOTIFICATION_CHANNEL_ID = "vital_signs_alerts"
+        const val NOTIFICATION_CHANNEL_NAME = "Alertas de Signos Vitales"
+        const val NOTIFICATION_CHANNEL_DESCRIPTION = "Notificaciones cuando los signos vitales están fuera del rango normal"
+    }
+
     // ========== Base de Datos ==========
     object Database {
         const val DATABASE_NAME = "vital_care_database"
