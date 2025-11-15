@@ -1,7 +1,11 @@
 package cl.duoc.app.ui.vitalsigns
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cl.duoc.app.data.anomaly.AnomalyDetectionService
+import cl.duoc.app.data.anomaly.AnomalyNotificationManager
+import cl.duoc.app.data.repository.AlertRepositoryRoomImpl
 import cl.duoc.app.domain.usecase.GetRecentVitalSignsUseCase
 import cl.duoc.app.domain.usecase.GetVitalSignsByDateRangeUseCase
 import cl.duoc.app.domain.usecase.CalculateRiskLevelUseCase
@@ -21,18 +25,28 @@ import kotlinx.coroutines.launch
  * - Calcular nivel de riesgo
  * - Filtrar por rango de fechas
  * - Proporcionar estadísticas
+ * - HU-04: Detectar anomalías y generar alertas automáticas
  */
 class VitalSignsViewModel(
     private val getRecentVitalSignsUseCase: GetRecentVitalSignsUseCase,
     private val getVitalSignsByDateRangeUseCase: GetVitalSignsByDateRangeUseCase,
-    private val calculateRiskLevelUseCase: CalculateRiskLevelUseCase
+    private val calculateRiskLevelUseCase: CalculateRiskLevelUseCase,
+    private val anomalyDetectionService: AnomalyDetectionService,
+    private val alertRepository: AlertRepositoryRoomImpl,
+    private val context: Context
 ) : ViewModel() {
+
+    private val notificationManager = AnomalyNotificationManager(context)
 
     private val _uiState = MutableStateFlow(VitalSignsUiState())
     val uiState: StateFlow<VitalSignsUiState> = _uiState.asStateFlow()
 
+    private val _anomalyDetectionState = MutableStateFlow<AnomalyDetectionState>(AnomalyDetectionState.Idle)
+    val anomalyDetectionState: StateFlow<AnomalyDetectionState> = _anomalyDetectionState.asStateFlow()
+
     /**
      * Carga los signos vitales recientes del usuario
+     * HU-04: Ahora también detecta anomalías en cada registro
      */
     fun loadVitalSigns(userId: String, limit: Int = 20) {
         viewModelScope.launch {
@@ -140,6 +154,67 @@ class VitalSignsViewModel(
     }
 
     /**
+     * HU-04: Detecta anomalías en signos vitales y genera alertas
+     * Este método se debe llamar cada vez que se registran nuevos signos vitales
+     */
+    fun detectAnomaliesInVitalSigns(vitalSigns: VitalSigns, userId: Long) {
+        viewModelScope.launch {
+            try {
+                _anomalyDetectionState.update { AnomalyDetectionState.Analyzing }
+
+                // 1. Detectar anomalías
+                val anomalies = anomalyDetectionService.detectAnomalies(vitalSigns)
+
+                if (anomalies.isNotEmpty()) {
+                    // 2. Guardar alertas en base de datos
+                    val alerts = anomalyDetectionService.createAlertsFromAnomalies(
+                        userId = userId,
+                        vitalSigns = vitalSigns,
+                        anomalies = anomalies
+                    )
+                    
+                    val alertIds = alertRepository.insertAlerts(alerts)
+
+                    // 3. Mostrar notificaciones para anomalías prioritarias
+                    anomalies.forEach { anomaly ->
+                        if (anomalyDetectionService.requiresImmediateNotification(anomaly)) {
+                            notificationManager.showAnomalyNotification(anomaly)
+                        }
+                    }
+
+                    _anomalyDetectionState.update {
+                        AnomalyDetectionState.AnomaliesDetected(
+                            anomalies = anomalies,
+                            alertIds = alertIds
+                        )
+                    }
+                } else {
+                    _anomalyDetectionState.update { AnomalyDetectionState.Normal }
+                }
+
+            } catch (e: Exception) {
+                _anomalyDetectionState.update {
+                    AnomalyDetectionState.Error("Error al detectar anomalías: ${e.message}")
+                }
+            }
+        }
+    }
+
+    /**
+     * Limpia el estado de detección de anomalías
+     */
+    fun clearAnomalyDetectionState() {
+        _anomalyDetectionState.value = AnomalyDetectionState.Idle
+    }
+
+    /**
+     * Verifica si las notificaciones están habilitadas
+     */
+    fun areNotificationsEnabled(): Boolean {
+        return notificationManager.areNotificationsEnabled()
+    }
+
+    /**
      * Calcula estadísticas de los signos vitales
      */
     private fun calculateStatistics(vitalSignsList: List<VitalSigns>): VitalSignsStatistics {
@@ -211,4 +286,18 @@ data class VitalSignsUiState(
         } else {
             vitalSignsList
         }
+}
+
+/**
+ * HU-04: Estado de detección de anomalías
+ */
+sealed class AnomalyDetectionState {
+    object Idle : AnomalyDetectionState()
+    object Analyzing : AnomalyDetectionState()
+    object Normal : AnomalyDetectionState()
+    data class AnomaliesDetected(
+        val anomalies: List<AnomalyDetectionService.AnomalyResult>,
+        val alertIds: List<Long>
+    ) : AnomalyDetectionState()
+    data class Error(val message: String) : AnomalyDetectionState()
 }
