@@ -117,10 +117,10 @@ private fun VitalSignsContent(
                 selectedFilter = uiState.selectedRiskFilter,
                 onFilterSelected = onRiskFilterSelected,
                 totalCount = uiState.vitalSignsList.size,
-                criticalCount = uiState.vitalSignsList.count { it.riskLevel == "Crítico" },
-                highCount = uiState.vitalSignsList.count { it.riskLevel == "Alto" },
-                mediumCount = uiState.vitalSignsList.count { it.riskLevel == "Medio" },
-                lowCount = uiState.vitalSignsList.count { it.riskLevel == "Bajo" }
+                criticalCount = uiState.vitalSignsList.count { it.riskLevel.name == "DANGER" },
+                highCount = uiState.vitalSignsList.count { it.riskLevel.name == "WARNING" },
+                mediumCount = uiState.vitalSignsList.count { it.riskLevel.name == "MEDIUM" },
+                lowCount = uiState.vitalSignsList.count { it.riskLevel.name == "LOW" }
             )
         }
 
@@ -368,9 +368,9 @@ private fun VitalSignsCard(
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
-            containerColor = when (riskLevel) {
-                "Crítico" -> MaterialTheme.colorScheme.errorContainer
-                "Alto" -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f)
+            containerColor = when (riskLevel.name) {
+                "DANGER" -> MaterialTheme.colorScheme.errorContainer
+                "WARNING" -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f)
                 else -> MaterialTheme.colorScheme.surfaceVariant
             }
         )
@@ -393,14 +393,14 @@ private fun VitalSignsCard(
                 )
 
                 Badge(
-                    containerColor = when (riskLevel) {
-                        "Crítico" -> MaterialTheme.colorScheme.error
-                        "Alto" -> MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
-                        "Medio" -> MaterialTheme.colorScheme.tertiary
+                    containerColor = when (riskLevel.name) {
+                        "DANGER" -> MaterialTheme.colorScheme.error
+                        "WARNING" -> MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
+                        "MEDIUM" -> MaterialTheme.colorScheme.tertiary
                         else -> MaterialTheme.colorScheme.primary
                     }
                 ) {
-                    Text(riskLevel)
+                    Text(riskLevel.name)
                 }
             }
 

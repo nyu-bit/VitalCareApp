@@ -99,7 +99,7 @@ class ScheduleAppointmentReminderUseCase(
             REMINDER_INTERVAL_MINUTES,
             TimeUnit.MINUTES
         )
-            .setBackoffPolicy(
+            .setBackoffCriteria(
                 BackoffPolicy.EXPONENTIAL,
                 15,
                 TimeUnit.MINUTES

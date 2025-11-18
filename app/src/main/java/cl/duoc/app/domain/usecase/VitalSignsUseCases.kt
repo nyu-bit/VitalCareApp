@@ -74,6 +74,51 @@ class GetLatestVitalSignsUseCase(
 }
 
 /**
+ * Caso de uso: Obtener signos vitales recientes
+ * Alias para GetLatestVitalSignsUseCase
+ */
+class GetRecentVitalSignsUseCase(
+    private val vitalSignsRepository: VitalSignsRepository
+) {
+    /**
+     * Ejecuta el caso de uso
+     *
+     * @param userId ID del usuario
+     * @param limit Cantidad de registros a obtener
+     * @return Lista de registros más recientes
+     */
+    suspend operator fun invoke(userId: String, limit: Int = 20): List<VitalSigns> {
+        require(userId.isNotBlank()) { "El ID del usuario no puede estar vacío" }
+        require(limit > 0) { "El límite debe ser mayor a 0" }
+        return vitalSignsRepository.getLatestVitalSigns(userId, limit)
+    }
+}
+
+/**
+ * Caso de uso: Obtener signos vitales por rango de fechas
+ */
+class GetVitalSignsByDateRangeUseCase(
+    private val vitalSignsRepository: VitalSignsRepository
+) {
+    /**
+     * Ejecuta el caso de uso
+     *
+     * @param userId ID del usuario
+     * @param startDate Fecha de inicio del rango
+     * @param endDate Fecha de término del rango
+     * @return Lista de registros en el rango de fechas
+     */
+    suspend operator fun invoke(userId: String, startDate: Long, endDate: Long): List<VitalSigns> {
+        require(userId.isNotBlank()) { "El ID del usuario no puede estar vacío" }
+        require(startDate <= endDate) { "La fecha de inicio no puede ser posterior a la fecha final" }
+
+        // Obtener todos los registros del usuario y filtrar por rango de fechas
+        val allVitalSigns = vitalSignsRepository.getLatestVitalSigns(userId, 1000)
+        return allVitalSigns.filter { it.timestamp in startDate..endDate }
+    }
+}
+
+/**
  * Caso de uso: Calcular nivel de riesgo de signos vitales
  * 
  * Analiza los valores y determina si están en rango normal, advertencia o peligro
@@ -85,32 +130,37 @@ class CalculateRiskLevelUseCase {
      * @param vitalSigns Signos vitales a analizar
      * @return Nivel de riesgo calculado
      */
-    operator fun invoke(vitalSigns: VitalSigns): RiskLevel {
+    operator fun invoke(vitalSigns: VitalSigns): RiskLevel = execute(vitalSigns)
+
+    /**
+     * Alternativa de ejecución para compatibilidad
+     */
+    fun execute(vitalSigns: VitalSigns): RiskLevel {
         var dangerCount = 0
         var warningCount = 0
         
         // Evaluar frecuencia cardíaca
         when {
-            vitalSigns.heartRate < 50 || vitalSigns.heartRate > 120 -> dangerCount++
-            vitalSigns.heartRate < 60 || vitalSigns.heartRate > 100 -> warningCount++
+            (vitalSigns.heartRate ?: 0) < 50 || (vitalSigns.heartRate ?: 0) > 120 -> dangerCount++
+            (vitalSigns.heartRate ?: 0) < 60 || (vitalSigns.heartRate ?: 0) > 100 -> warningCount++
         }
         
         // Evaluar presión arterial sistólica
         when {
-            vitalSigns.bloodPressureSystolic < 90 || vitalSigns.bloodPressureSystolic > 180 -> dangerCount++
-            vitalSigns.bloodPressureSystolic < 100 || vitalSigns.bloodPressureSystolic > 140 -> warningCount++
+            (vitalSigns.bloodPressureSystolic ?: 0) < 90 || (vitalSigns.bloodPressureSystolic ?: 0) > 180 -> dangerCount++
+            (vitalSigns.bloodPressureSystolic ?: 0) < 100 || (vitalSigns.bloodPressureSystolic ?: 0) > 140 -> warningCount++
         }
         
         // Evaluar presión arterial diastólica
         when {
-            vitalSigns.bloodPressureDiastolic < 60 || vitalSigns.bloodPressureDiastolic > 110 -> dangerCount++
-            vitalSigns.bloodPressureDiastolic < 65 || vitalSigns.bloodPressureDiastolic > 90 -> warningCount++
+            (vitalSigns.bloodPressureDiastolic ?: 0) < 60 || (vitalSigns.bloodPressureDiastolic ?: 0) > 110 -> dangerCount++
+            (vitalSigns.bloodPressureDiastolic ?: 0) < 65 || (vitalSigns.bloodPressureDiastolic ?: 0) > 90 -> warningCount++
         }
         
         // Evaluar saturación de oxígeno
         when {
-            vitalSigns.oxygenSaturation < 90 -> dangerCount++
-            vitalSigns.oxygenSaturation < 95 -> warningCount++
+            (vitalSigns.oxygenSaturation ?: 0) < 90 -> dangerCount++
+            (vitalSigns.oxygenSaturation ?: 0) < 95 -> warningCount++
         }
         
         return when {

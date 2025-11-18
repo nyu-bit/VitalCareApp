@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
@@ -126,7 +127,7 @@ fun PatientLocationMapContent(
 
     LaunchedEffect(zoom) {
         cameraPositionState.animate(
-            update = com.google.android.gms.maps.model.CameraUpdateFactory.zoomTo(zoom)
+            update = CameraUpdateFactory.zoomTo(zoom)
         )
     }
 

@@ -33,7 +33,7 @@ object ServiceLocator {
      */
     fun initialize(appContext: Context) {
         context = appContext
-        database = VitalCareDatabase.getInstance(context)
+        database = VitalCareDatabase.getDatabase(context)
         prefsManager = SharedPreferencesManager(context)
         // Supongamos que UserRepository ya está disponible
         // userRepository = UserRepositoryRoomImpl(database, prefsManager)

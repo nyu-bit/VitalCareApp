@@ -69,9 +69,7 @@ class LocationRepositoryImpl(
 
     override suspend fun getHealthCenterLocation(): HealthCenter? = withContext(Dispatchers.IO) {
         return@withContext try {
-            healthCenterDao.getAllHealthCenters().firstOrNull()?.let {
-                it.toHealthCenterDomainList().firstOrNull()
-            }
+            healthCenterDao.getAllHealthCenters().toHealthCenterDomainList().firstOrNull()
         } catch (e: Exception) {
             e.printStackTrace()
             null

@@ -17,6 +17,7 @@ import cl.duoc.app.utils.ErrorHandler
  * Pantalla de ejemplo que demuestra el manejo correcto de errores en la UI
  * Muestra diferentes estados: loading, success, error
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ErrorHandlingScreen(
     viewModel: ErrorHandlingViewModel,

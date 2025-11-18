@@ -126,8 +126,7 @@ fun DashboardScreen(
                 vitalSigns.forEachIndexed { index, vitalSign ->
                     AnimatedVisibility(
                         visible = cardsVisible,
-                        enter = fadeIn() + expandVertically(),
-                        modifier = Modifier.animateEnterExit()
+                        enter = fadeIn() + expandVertically()
                     ) {
                         VitalSignCard(
                             vitalSignData = vitalSign,

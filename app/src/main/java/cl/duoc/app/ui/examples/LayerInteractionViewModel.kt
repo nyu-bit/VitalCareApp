@@ -10,8 +10,10 @@ import cl.duoc.app.domain.usecase.CalculateRiskLevelUseCase
 import cl.duoc.app.domain.usecase.GetRecentVitalSignsUseCase
 import cl.duoc.app.model.User
 import cl.duoc.app.model.VitalSigns
+import cl.duoc.app.model.RiskLevel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 
 /**
  * EJEMPLO COMPLETO: Interacción entre capas usando Clean Architecture
@@ -58,8 +60,8 @@ class LayerInteractionViewModel(
             try {
                 // CAPA UI -> CAPA DOMAIN
                 // El ViewModel llama al Use Case (lógica de negocio)
-                val user = getUserUseCase.execute(userId)
-                
+                val user = getUserUseCase(userId)
+
                 // CAPA DOMAIN devuelve resultado a CAPA UI
                 _uiState.update { 
                     it.copy(
@@ -97,21 +99,20 @@ class LayerInteractionViewModel(
             
             try {
                 // El UseCase encapsula lógica de negocio compleja
-                val recentVitalSigns = getRecentVitalSignsUseCase.execute(
+                val recentVitalSigns = getRecentVitalSignsUseCase(
                     userId = userId,
                     limit = 10 // Obtener últimos 10 registros
                 )
                 
                 // Calcular nivel de riesgo usando otro UseCase
                 val riskLevels = recentVitalSigns.map { vitalSigns ->
-                    vitalSigns to calculateRiskLevelUseCase.execute(vitalSigns)
+                    vitalSigns to calculateRiskLevelUseCase(vitalSigns)
                 }
-                
-                _uiState.update { 
+
+                _uiState.update {
                     it.copy(
                         isLoadingVitalSigns = false,
-                        recentVitalSigns = recentVitalSigns,
-                        riskLevels = riskLevels.toMap()
+                        recentVitalSigns = recentVitalSigns
                     )
                 }
             } catch (e: Exception) {
@@ -139,21 +140,22 @@ class LayerInteractionViewModel(
     fun observeUserVitalSigns(userId: String) {
         viewModelScope.launch {
             // IMPORTANTE: collect es terminal y mantiene la suscripción activa
-            vitalSignsRepository.getVitalSignsFlow(userId)
-                .catch { e ->
-                    _uiState.update { 
-                        it.copy(error = "Error observando signos: ${e.message}")
+            try {
+                vitalSignsRepository.observeVitalSigns(userId)
+                    .collect { vitalSignsList ->
+                        // Cada vez que cambia la BD, esto se ejecuta
+                        _uiState.update {
+                            it.copy(
+                                recentVitalSigns = vitalSignsList.take(10),
+                                totalVitalSignsCount = vitalSignsList.size
+                            )
+                        }
                     }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(error = "Error observando signos: ${e.message}")
                 }
-                .collect { vitalSignsList ->
-                    // Cada vez que cambia la BD, esto se ejecuta
-                    _uiState.update { 
-                        it.copy(
-                            recentVitalSigns = vitalSignsList.take(10),
-                            totalVitalSignsCount = vitalSignsList.size
-                        )
-                    }
-                }
+            }
         }
     }
 
@@ -183,10 +185,10 @@ class LayerInteractionViewModel(
                 
                 // CAPA UI -> CAPA DOMAIN
                 // El UseCase valida y guarda
-                val success = saveUserUseCase.execute(user)
-                
-                if (success) {
-                    _uiState.update { 
+                val result = saveUserUseCase(user)
+
+                if (result.isSuccess) {
+                    _uiState.update {
                         it.copy(
                             isSaving = false,
                             currentUser = user,
@@ -229,9 +231,9 @@ class LayerInteractionViewModel(
             
             try {
                 // Llamadas en paralelo usando async
-                val userDeferred = async { getUserUseCase.execute(userId) }
-                val vitalSignsDeferred = async { 
-                    getRecentVitalSignsUseCase.execute(userId, 5) 
+                val userDeferred = async { getUserUseCase(userId) }
+                val vitalSignsDeferred = async {
+                    getRecentVitalSignsUseCase(userId, 5)
                 }
                 
                 // Esperar ambos resultados
@@ -240,7 +242,7 @@ class LayerInteractionViewModel(
                 
                 // Calcular estadísticas
                 val riskLevels = vitalSigns.map { 
-                    calculateRiskLevelUseCase.execute(it) 
+                    calculateRiskLevelUseCase(it)
                 }
                 
                 _uiState.update { 
@@ -275,15 +277,13 @@ class LayerInteractionViewModel(
             try {
                 // Acceso directo al Repository (sin UseCase)
                 // Válido para operaciones CRUD simples sin lógica de negocio
-                userRepository.getAllUsersFlow()
-                    .collect { users ->
-                        _uiState.update { 
-                            it.copy(
-                                isLoading = false,
-                                allUsers = users
-                            )
-                        }
-                    }
+                val users = userRepository.getAllUsers()
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        allUsers = users
+                    )
+                }
             } catch (e: Exception) {
                 _uiState.update { 
                     it.copy(
@@ -310,11 +310,11 @@ class LayerInteractionViewModel(
             
             try {
                 // Paso 1: Cargar usuario
-                val user = getUserUseCase.execute(userId)
+                val user = getUserUseCase(userId)
                 _uiState.update { it.copy(currentUser = user) }
                 
                 // Paso 2: Cargar signos vitales
-                val vitalSigns = getRecentVitalSignsUseCase.execute(userId, 10)
+                val vitalSigns = getRecentVitalSignsUseCase(userId, 10)
                 _uiState.update { it.copy(recentVitalSigns = vitalSigns) }
                 
                 // Paso 3: Calcular estadísticas
@@ -339,14 +339,11 @@ class LayerInteractionViewModel(
     }
 
     // Funciones auxiliares privadas (lógica de UI, no de negocio)
-    private fun calculateAverageRisk(riskLevels: List<String>): String {
+    private fun calculateAverageRisk(riskLevels: List<RiskLevel>): String {
         // Lógica simple de presentación
-        val criticalCount = riskLevels.count { it == "Crítico" }
-        val highCount = riskLevels.count { it == "Alto" }
-        
         return when {
-            criticalCount > 0 -> "Crítico"
-            highCount > riskLevels.size / 2 -> "Alto"
+            riskLevels.any { it.name == "DANGER" } -> "Crítico"
+            riskLevels.count { it.name == "WARNING" } > riskLevels.size / 2 -> "Alto"
             else -> "Normal"
         }
     }
@@ -359,10 +356,6 @@ class LayerInteractionViewModel(
             averageOxygenSaturation = vitalSigns.mapNotNull { it.oxygenSaturation }.average().toInt()
         )
     }
-
-    // Helper para async
-    private fun <T> async(block: suspend () -> T) = 
-        kotlinx.coroutines.async(viewModelScope.coroutineContext) { block() }
 }
 
 /**

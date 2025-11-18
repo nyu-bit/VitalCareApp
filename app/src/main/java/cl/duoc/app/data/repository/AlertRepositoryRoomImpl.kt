@@ -45,10 +45,8 @@ class AlertRepositoryRoomImpl(
      * Obtiene todas las alertas de un usuario específico
      * Ordenadas por timestamp descendente (más reciente primero)
      */
-    fun getAllAlertsByUser(userId: Long): Flow<List<Alert>> {
-        return alertDao.getAlertsByUserId(userId).map { entities ->
-            entities.map { it.toDomainModel() }
-        }
+    suspend fun getAllAlertsByUser(userId: Long): List<Alert> {
+        return alertDao.getAlertsByUserId(userId).map { it.toDomainModel() }
     }
 
     /**
@@ -122,7 +120,6 @@ class AlertRepositoryRoomImpl(
      * Obtiene estadísticas de alertas por prioridad
      */
     suspend fun getAlertStatsByPriority(userId: Long): Map<String, Int> {
-        // Implementación simplificada - en producción usar query agregada
         val alerts = alertDao.getAlertsByUserId(userId)
         return mapOf(
             "Alta" to alerts.count { it.priority == "Alta" },

@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import cl.duoc.app.model.SOSEvent
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.google.android.gms.maps.CameraUpdateFactory
 
 /**
  * Pantalla para activar SOS y visualizar historial
@@ -396,4 +398,3 @@ fun formatSOSTime(timestamp: Long): String {
     val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
     return sdf.format(Date(timestamp))
 }
-

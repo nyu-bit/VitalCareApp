@@ -186,12 +186,12 @@ private fun AlertsContent(
             items = uiState.filteredAlerts,
             key = { it.id }
         ) { alert ->
-            AlertCard(
+            AlertItem(
                 alert = alert,
                 onClick = { onAlertClick(alert.id) },
                 onMarkAsRead = { onMarkAsRead(alert.id) },
                 onDelete = { onDeleteAlert(alert.id) },
-                modifier = Modifier.animateItemPlacement()
+                modifier = Modifier.animateItem()
             )
         }
 
@@ -351,11 +351,9 @@ private fun AlertCard(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var showMenu by remember { mutableStateOf(false) }
-
     Card(
-        onClick = onClick,
         modifier = modifier.fillMaxWidth(),
+        onClick = onClick,
         colors = CardDefaults.cardColors(
             containerColor = when {
                 !alert.isRead && alert.severity == "Crítico" -> MaterialTheme.colorScheme.errorContainer
@@ -365,142 +363,51 @@ private fun AlertCard(
             }
         )
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Ícono según tipo
-                    Icon(
-                        imageVector = when (alert.type) {
-                            "Signos Vitales" -> Icons.Default.MonitorHeart
-                            "Cita" -> Icons.Default.Event
-                            "Medicamento" -> Icons.Default.Medication
-                            else -> Icons.Default.Info
-                        },
-                        contentDescription = null,
-                        tint = when {
-                            alert.severity == "Crítico" -> MaterialTheme.colorScheme.error
-                            alert.severity == "Alto" -> MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
-                            else -> MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                        modifier = Modifier.size(24.dp)
-                    )
-
-                    // Badge de severidad
-                    Badge(
-                        containerColor = when (alert.severity) {
-                            "Crítico" -> MaterialTheme.colorScheme.error
-                            "Alto" -> MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
-                            "Medio" -> MaterialTheme.colorScheme.tertiary
-                            else -> MaterialTheme.colorScheme.primary
-                        }
-                    ) {
-                        Text(
-                            text = alert.severity,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-
-                    // Badge de tipo
-                    AssistChip(
-                        onClick = {},
-                        label = {
-                            Text(
-                                text = alert.type,
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        },
-                        modifier = Modifier.height(24.dp)
-                    )
-                }
-
-                // Menú de acciones
-                Box {
-                    IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Default.MoreVert, "Más opciones")
-                    }
-
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
-                    ) {
-                        if (!alert.isRead) {
-                            DropdownMenuItem(
-                                text = { Text("Marcar como leída") },
-                                onClick = {
-                                    onMarkAsRead()
-                                    showMenu = false
-                                },
-                                leadingIcon = {
-                                    Icon(Icons.Default.DoneAll, null)
-                                }
-                            )
-                        }
-
-                        DropdownMenuItem(
-                            text = { Text("Eliminar") },
-                            onClick = {
-                                onDelete()
-                                showMenu = false
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Default.Delete, null)
-                            }
-                        )
-                    }
-                }
-            }
-
-            // Título
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (!alert.isRead) {
-                    Badge(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ) {
-                        Text("NUEVA")
-                    }
-                }
-
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = alert.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Text(
+                    text = alert.message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = FormatUtils.formatDateTime(alert.timestamp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
-            // Mensaje
-            Text(
-                text = alert.message,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            // Fecha
-            Text(
-                text = FormatUtils.formatDateTime(alert.timestamp),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
+}
+
+/**
+ * Alias para AlertCard para compatibilidad
+ */
+@Composable
+private fun AlertItem(
+    alert: Alert,
+    onClick: () -> Unit,
+    onMarkAsRead: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AlertCard(
+        alert = alert,
+        onClick = onClick,
+        onMarkAsRead = onMarkAsRead,
+        onDelete = onDelete,
+        modifier = modifier
+    )
 }
 
 /**
@@ -562,7 +469,7 @@ private fun EmptyView(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
     ) {
         Icon(
-            imageVector = Icons.Default.Notifications,
+            imageVector = Icons.Default.Info,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -573,7 +480,7 @@ private fun EmptyView(modifier: Modifier = Modifier) {
             textAlign = TextAlign.Center
         )
         Text(
-            text = "Todas las alertas importantes aparecerán aquí",
+            text = "No hay alertas para mostrar en este momento",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center

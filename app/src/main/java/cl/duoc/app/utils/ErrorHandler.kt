@@ -24,9 +24,9 @@ object ErrorHandler {
     /**
      * Resultado de operación que puede fallar
      */
-    sealed class Result<out T> {
+    sealed class Result<T> {
         data class Success<T>(val data: T) : Result<T>()
-        data class Error(val message: String, val type: ErrorType) : Result<Nothing>()
+        data class Error<T>(val message: String, val type: ErrorType) : Result<T>()
     }
 
     /**
@@ -66,9 +66,8 @@ object ErrorHandler {
             is java.net.SocketTimeoutException,
             is java.io.IOException -> ErrorType.NETWORK
             
-            is android.database.SQLException,
-            is android.database.sqlite.SQLiteException -> ErrorType.DATABASE
-            
+            is android.database.SQLException -> ErrorType.DATABASE
+
             is IllegalArgumentException,
             is IllegalStateException -> ErrorType.VALIDATION
             
@@ -105,28 +104,10 @@ object ErrorHandler {
     /**
      * Ejecuta un bloque de código de forma segura, capturando y manejando excepciones
      */
-    inline fun <T> safeCall(
+    fun <T> safeCall(
         tag: String = TAG,
         customErrorMessage: String? = null,
         block: () -> T
-    ): Result<T> {
-        return try {
-            Result.Success(block())
-        } catch (e: Exception) {
-            val errorType = classifyException(e)
-            val message = customErrorMessage ?: getUserFriendlyMessage(errorType)
-            logError(tag, message, e)
-            Result.Error(message, errorType)
-        }
-    }
-
-    /**
-     * Ejecuta un bloque de código suspendible de forma segura
-     */
-    suspend inline fun <T> safeSuspendCall(
-        tag: String = TAG,
-        customErrorMessage: String? = null,
-        crossinline block: suspend () -> T
     ): Result<T> {
         return try {
             Result.Success(block())

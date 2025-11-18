@@ -51,4 +51,11 @@ object FormatUtils {
     fun formatOxygenSaturation(saturation: Int): String {
         return "$saturation%"
     }
+
+    /**
+     * Formatea fecha y hora completa
+     */
+    fun formatDateTime(timestamp: Long): String {
+        return formatDate(timestamp, "dd/MM/yyyy HH:mm:ss")
+    }
 }

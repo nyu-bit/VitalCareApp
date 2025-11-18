@@ -39,7 +39,7 @@ class AnomalyMonitoringViewModel(
      * Monitorea signos vitales y detecta anomalías
      * Este método se llama cada vez que se ingresan o actualizan signos vitales
      */
-    fun monitorVitalSigns(vitalSigns: VitalSigns, userId: Long) {
+    fun monitorVitalSigns(vitalSigns: VitalSigns, userId: String) {
         viewModelScope.launch {
             try {
                 _monitoringState.update { AnomalyMonitoringState.Analyzing }

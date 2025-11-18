@@ -180,6 +180,7 @@ fun HomeScreen(
 
                     // Mensaje de error si existe
                     if (uiState.hasError && uiState.errorMessage != null) {
+                        val errorMsg = uiState.errorMessage
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(
@@ -194,7 +195,7 @@ fun HomeScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = uiState.errorMessage,
+                                    text = errorMsg ?: "Error desconocido",
                                     color = MaterialTheme.colorScheme.onErrorContainer,
                                     modifier = Modifier.weight(1f)
                                 )

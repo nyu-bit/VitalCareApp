@@ -32,6 +32,7 @@ import cl.duoc.app.utils.FormatUtils
  * 5. Compose detecta cambio automáticamente
  * 6. UI se recompone mostrando nueva información
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LayerInteractionScreen(
     viewModel: LayerInteractionViewModel,

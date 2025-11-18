@@ -56,71 +56,57 @@ class ErrorHandlingViewModel(
     }
 
     /**
-     * Ejemplo 2: Uso de safeCall para operaciones simples
+     * Ejemplo 2: Uso directo de try-catch con ErrorHandler
      */
     fun loadUserWithSafeCall(userId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             
-            when (val result = ErrorHandler.safeCall(
-                tag = "ErrorHandlingViewModel",
-                customErrorMessage = "Error al cargar usuario"
-            ) {
-                userRepository.getUserById(userId)
-            }) {
-                is ErrorHandler.Result.Success -> {
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false,
-                            user = result.data,
-                            error = null
-                        )
-                    }
+            try {
+                val user = userRepository.getUserById(userId)
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        user = user,
+                        error = null
+                    )
                 }
-                is ErrorHandler.Result.Error -> {
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false,
-                            error = result.message,
-                            errorType = result.type
-                        )
-                    }
+            } catch (e: Exception) {
+                val errorMessage = ErrorHandler.handleException(e, "ErrorHandlingViewModel")
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = errorMessage
+                    )
                 }
             }
         }
     }
 
     /**
-     * Ejemplo 3: Uso de safeSuspendCall para operaciones suspendibles
+     * Ejemplo 3: Guardar usuario con manejo de errores
      */
     fun saveUserWithErrorHandling(user: User) {
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, error = null) }
             
-            when (val result = ErrorHandler.safeSuspendCall(
-                tag = "ErrorHandlingViewModel",
-                customErrorMessage = "No se pudo guardar el usuario"
-            ) {
+            try {
                 userRepository.saveUser(user)
-            }) {
-                is ErrorHandler.Result.Success -> {
-                    _uiState.update { 
-                        it.copy(
-                            isSaving = false,
-                            savedSuccessfully = true,
-                            error = null
-                        )
-                    }
-                    ErrorHandler.logInfo("ErrorHandlingViewModel", "Usuario guardado exitosamente")
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        savedSuccessfully = true,
+                        error = null
+                    )
                 }
-                is ErrorHandler.Result.Error -> {
-                    _uiState.update { 
-                        it.copy(
-                            isSaving = false,
-                            error = result.message,
-                            errorType = result.type
-                        )
-                    }
+                ErrorHandler.logInfo("ErrorHandlingViewModel", "Usuario guardado exitosamente")
+            } catch (e: Exception) {
+                val errorMessage = ErrorHandler.handleException(e, "ErrorHandlingViewModel")
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        error = errorMessage
+                    )
                 }
             }
         }

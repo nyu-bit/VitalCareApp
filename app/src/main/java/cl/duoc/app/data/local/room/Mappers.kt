@@ -112,6 +112,13 @@ fun VitalSigns.toEntity(): VitalSignsEntity {
 }
 
 /**
+ * Convierte lista de VitalSignsEntity a lista de VitalSigns
+ */
+fun List<VitalSignsEntity>.toVitalSignsDomainList(): List<VitalSigns> {
+    return this.map { it.toDomain() }
+}
+
+/**
  * Convierte SOSEventEntity (Room) a SOSEvent (Dominio)
  */
 fun SOSEventEntity.toDomain(): SOSEvent {

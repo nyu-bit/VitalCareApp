@@ -33,8 +33,8 @@ class AnomalyDetectionService {
         val anomalies = mutableListOf<AnomalyResult>()
 
         // Verificar presión arterial
-        vitalSigns.systolicPressure?.let { systolic ->
-            vitalSigns.diastolicPressure?.let { diastolic ->
+        vitalSigns.bloodPressureSystolic?.let { systolic ->
+            vitalSigns.bloodPressureDiastolic?.let { diastolic ->
                 val pressureAnomaly = checkBloodPressure(systolic, diastolic)
                 if (pressureAnomaly.hasAnomaly) {
                     anomalies.add(pressureAnomaly)
@@ -226,47 +226,25 @@ class AnomalyDetectionService {
      * Convierte anomalías detectadas en alertas para guardar en base de datos
      */
     fun createAlertsFromAnomalies(
-        userId: Long,
+        userId: String,
         vitalSigns: VitalSigns,
         anomalies: List<AnomalyResult>
     ): List<Alert> {
         return anomalies.map { anomaly ->
             Alert(
-                id = 0, // Se generará por la BD
+                id = java.util.UUID.randomUUID().toString(),
                 userId = userId,
                 title = anomaly.anomalyType ?: "Anomalía detectada",
-                description = anomaly.description ?: "",
-                priority = anomaly.priority ?: Constants.AnomalyDetection.ALERT_PRIORITY_LOW,
-                timestamp = LocalDateTime.now().toString(),
+                message = anomaly.description ?: "",
+                severity = anomaly.priority ?: Constants.AnomalyDetection.ALERT_PRIORITY_LOW,
+                type = "Signos Vitales",
                 isRead = false,
-                actionTaken = null,
-                vitalSignsSnapshot = formatVitalSignsSnapshot(vitalSigns),
-                recommendedAction = anomaly.recommendedAction
+                timestamp = System.currentTimeMillis(),
+                relatedId = vitalSigns.id
             )
         }
     }
 
-    /**
-     * Formatea signos vitales para snapshot en la alerta
-     */
-    private fun formatVitalSignsSnapshot(vitalSigns: VitalSigns): String {
-        val parts = mutableListOf<String>()
-        
-        if (vitalSigns.systolicPressure != null && vitalSigns.diastolicPressure != null) {
-            parts.add("PA: ${vitalSigns.systolicPressure}/${vitalSigns.diastolicPressure} mmHg")
-        }
-        if (vitalSigns.heartRate != null) {
-            parts.add("FC: ${vitalSigns.heartRate} bpm")
-        }
-        if (vitalSigns.oxygenSaturation != null) {
-            parts.add("SpO2: ${vitalSigns.oxygenSaturation}%")
-        }
-        if (vitalSigns.temperature != null) {
-            parts.add("Temp: ${vitalSigns.temperature}°C")
-        }
-        
-        return parts.joinToString(" | ")
-    }
 
     /**
      * Determina si una anomalía requiere notificación inmediata

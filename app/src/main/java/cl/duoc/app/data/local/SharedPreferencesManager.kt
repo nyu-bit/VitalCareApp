@@ -14,8 +14,8 @@ class SharedPreferencesManager(context: Context) {
     private val sharedPreferences: SharedPreferences = 
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     
-    private val gson = Gson()
-    
+    val gson = Gson()
+
     companion object {
         private const val PREFS_NAME = "vital_care_prefs"
         

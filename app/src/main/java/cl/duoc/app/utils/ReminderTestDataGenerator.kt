@@ -83,7 +83,7 @@ object ReminderTestDataGenerator {
             
             // 1. Crear una reserva futura
             val reservation = ReminderTestDataGenerator.createTestReservation(hoursFromNow = 2)
-            Log.d("RemindersTest", "Reserva creada: ${reservation.id}")
+            Log.d("RemindersTest", "Reserva creada: {reservation_id}")
             
             // 2. Agregar a repositorio
             reservationRepository.createReservation(reservation)
@@ -92,7 +92,7 @@ object ReminderTestDataGenerator {
             val viewModel = RemindersViewModel(WorkManager.getInstance(context))
             
             // 4. Programar recordatorio
-            viewModel.scheduleReminder(reservation.id)
+            viewModel.scheduleReminder("reservation_id")
             // Esperar a que se complete la coroutine
             
             // 5. Cargar recordatorios pendientes
@@ -110,9 +110,9 @@ object ReminderTestDataGenerator {
             // 8. Cancelar recordatorio
             val upcomingReminders = viewModel.upcomingReminders.value
             if (upcomingReminders.isNotEmpty()) {
-                val reminderId = upcomingReminders[0].reminderId
+                val reminderId = upcomingReminders[0].id
                 viewModel.cancelReminder(reminderId)
-                Log.d("RemindersTest", "Recordatorio cancelado: $reminderId")
+                Log.d("RemindersTest", "Recordatorio cancelado: {reminder_id}")
             }
         """.trimIndent()
     }

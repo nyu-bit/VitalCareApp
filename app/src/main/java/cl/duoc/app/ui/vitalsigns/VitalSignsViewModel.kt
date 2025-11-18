@@ -10,6 +10,7 @@ import cl.duoc.app.domain.usecase.GetRecentVitalSignsUseCase
 import cl.duoc.app.domain.usecase.GetVitalSignsByDateRangeUseCase
 import cl.duoc.app.domain.usecase.CalculateRiskLevelUseCase
 import cl.duoc.app.model.VitalSigns
+import cl.duoc.app.model.RiskLevel
 import cl.duoc.app.utils.ErrorHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -53,11 +54,11 @@ class VitalSignsViewModel(
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             try {
-                val vitalSignsList = getRecentVitalSignsUseCase.execute(userId, limit)
+                val vitalSignsList = getRecentVitalSignsUseCase(userId, limit)
 
                 // Calcular nivel de riesgo para cada registro
                 val vitalSignsWithRisk = vitalSignsList.map { vitalSigns ->
-                    val riskLevel = calculateRiskLevelUseCase.execute(vitalSigns)
+                    val riskLevel = calculateRiskLevelUseCase(vitalSigns)
                     VitalSignsWithRisk(vitalSigns, riskLevel)
                 }
 
@@ -95,14 +96,14 @@ class VitalSignsViewModel(
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             try {
-                val vitalSignsList = getVitalSignsByDateRangeUseCase.execute(
+                val vitalSignsList = getVitalSignsByDateRangeUseCase(
                     userId = userId,
                     startDate = startDate,
                     endDate = endDate
                 )
 
                 val vitalSignsWithRisk = vitalSignsList.map { vitalSigns ->
-                    val riskLevel = calculateRiskLevelUseCase.execute(vitalSigns)
+                    val riskLevel = calculateRiskLevelUseCase(vitalSigns)
                     VitalSignsWithRisk(vitalSigns, riskLevel)
                 }
 
@@ -157,7 +158,7 @@ class VitalSignsViewModel(
      * HU-04: Detecta anomalías en signos vitales y genera alertas
      * Este método se debe llamar cada vez que se registran nuevos signos vitales
      */
-    fun detectAnomaliesInVitalSigns(vitalSigns: VitalSigns, userId: Long) {
+    fun detectAnomaliesInVitalSigns(vitalSigns: VitalSigns, userId: String) {
         viewModelScope.launch {
             try {
                 _anomalyDetectionState.update { AnomalyDetectionState.Analyzing }
@@ -249,7 +250,7 @@ class VitalSignsViewModel(
  */
 data class VitalSignsWithRisk(
     val vitalSigns: VitalSigns,
-    val riskLevel: String
+    val riskLevel: RiskLevel
 )
 
 /**
@@ -282,7 +283,7 @@ data class VitalSignsUiState(
      */
     val filteredVitalSigns: List<VitalSignsWithRisk>
         get() = if (selectedRiskFilter != null) {
-            vitalSignsList.filter { it.riskLevel == selectedRiskFilter }
+            vitalSignsList.filter { it.riskLevel.name == selectedRiskFilter }
         } else {
             vitalSignsList
         }

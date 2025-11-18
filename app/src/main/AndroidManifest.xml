@@ -34,7 +34,8 @@
         <!-- Receptor de boot completado para WorkManager -->
         <receiver
             android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
-            android:exported="false" />
+            android:exported="false"
+            tools:replace="android:exported" />
     </application>
 
 </manifest>

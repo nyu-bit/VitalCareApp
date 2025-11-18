@@ -21,27 +21,29 @@ object TestDataGenerator {
         userId: String,
         isHealthy: Boolean = true
     ): cl.duoc.app.model.VitalSigns {
-        val (heartRate, systolic, diastolic, oxygen) = if (isHealthy) {
-            Triple(
+        val (heartRateRange, systolicRange, diastolicRange, oxygenValue) = if (isHealthy) {
+            intArrayOf(
                 Random.nextInt(60, 100),
                 Random.nextInt(110, 130),
-                Random.nextInt(70, 85)
-            ) to Random.nextInt(95, 100)
+                Random.nextInt(70, 85),
+                Random.nextInt(95, 100)
+            )
         } else {
-            Triple(
+            intArrayOf(
                 Random.nextInt(120, 150),
                 Random.nextInt(150, 180),
-                Random.nextInt(95, 110)
-            ) to Random.nextInt(85, 94)
+                Random.nextInt(95, 110),
+                Random.nextInt(85, 94)
+            )
         }
         
         return cl.duoc.app.model.VitalSigns(
             id = generateId(),
             userId = userId,
-            heartRate = heartRate,
-            bloodPressureSystolic = systolic,
-            bloodPressureDiastolic = diastolic,
-            oxygenSaturation = oxygen
+            heartRate = heartRateRange,
+            bloodPressureSystolic = systolicRange,
+            bloodPressureDiastolic = diastolicRange,
+            oxygenSaturation = oxygenValue
         )
     }
     
@@ -118,4 +120,12 @@ object TestDataGenerator {
             )
         }
     }
+}
+
+// Class para soportar destructuración de 4 elementos
+class Tuple4<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D) {
+    operator fun component1() = first
+    operator fun component2() = second
+    operator fun component3() = third
+    operator fun component4() = fourth
 }

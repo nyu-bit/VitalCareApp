@@ -46,12 +46,12 @@ class SaveUserUseCase(
     suspend operator fun invoke(user: User): Result<Boolean> {
         return try {
             // Validaciones de negocio
-            require(user.name.isNotBlank()) { "El nombre es requerido" }
-            require(user.email.isNotBlank()) { "El email es requerido" }
-            require(user.email.contains("@")) { "El email debe ser válido" }
-            
+            require(!user.name.isNullOrBlank()) { "El nombre es requerido" }
+            require(!user.email.isNullOrBlank()) { "El email es requerido" }
+            require(user.email?.contains("@") == true) { "El email debe ser válido" }
+
             // Verificar si ya existe un usuario con ese email
-            val existingUser = userRepository.getUserByEmail(user.email)
+            val existingUser = userRepository.getUserByEmail(user.email ?: "")
             if (existingUser != null && existingUser.id != user.id) {
                 return Result.failure(Exception("Ya existe un usuario con ese email"))
             }

@@ -1,0 +1,33 @@
+✅ ERROR CORREGIDO - AnomalyDetectionService
+
+═══════════════════════════════════════════════════════════════════
+
+🔴 ERROR ENCONTRADO:
+
+  Unresolved reference 'systolicPressure'
+  Archivo: AnomalyDetectionService.kt:36
+
+✅ SOLUCIÓN APLICADA:
+
+  systolicPressure → bloodPressureSystolic
+  diastolicPressure → bloodPressureDiastolic
+
+═══════════════════════════════════════════════════════════════════
+
+📁 CAMBIOS REALIZADOS:
+
+  app/src/main/java/cl/duoc/app/data/anomaly/AnomalyDetectionService.kt
+  ├─ Línea 36: systolicPressure → bloodPressureSystolic
+  └─ Línea 37: diastolicPressure → bloodPressureDiastolic
+
+═══════════════════════════════════════════════════════════════════
+
+🚀 COMPILAR:
+
+  $ .\gradlew clean build
+
+═══════════════════════════════════════════════════════════════════
+
+Status: ✅ CORREGIDO
+Siguiente: Compilar y verificar otros errores
+

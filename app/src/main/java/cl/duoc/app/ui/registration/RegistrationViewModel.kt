@@ -145,12 +145,12 @@ class RegistrationViewModel(
                 )
 
                 // Validar con UseCase (validaciones de negocio)
-                validateUserDataUseCase.execute(user)
+                validateUserDataUseCase(user)
 
                 // Guardar usuario
-                val success = saveUserUseCase.execute(user)
+                val result = saveUserUseCase(user)
 
-                if (success) {
+                if (result.isSuccess) {
                     _uiState.update {
                         it.copy(
                             isRegistering = false,
@@ -228,18 +228,18 @@ class RegistrationViewModel(
     }
 
     private fun validatePhone(phone: String): String? {
-        if (phone.isBlank()) return null // Opcional
-
-        return when (val result = FormValidators.phone.validate(phone)) {
+        val localPhone = phone
+        if (localPhone.isBlank()) return null // Opcional
+        return when (val result = FormValidators.phoneChile.validate(localPhone)) {
             is ValidationResult.Success -> null
             is ValidationResult.Error -> result.message
         }
     }
 
     private fun validateRut(rut: String): String? {
-        if (rut.isBlank()) return "El RUT es requerido"
-
-        return when (val result = FormValidators.rut.validate(rut)) {
+        val localRut = rut
+        if (localRut.isBlank()) return "El RUT es requerido"
+        return when (val result = FormValidators.rutChile.validate(localRut)) {
             is ValidationResult.Success -> null
             is ValidationResult.Error -> result.message
         }
