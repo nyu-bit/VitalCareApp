@@ -79,6 +79,17 @@ fun DashboardScreen(
                             fontWeight = FontWeight.Bold
                         ) 
                     },
+                    actions = {
+                        IconButton(
+                            onClick = { onNavigateToProfile() }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Perfil",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         titleContentColor = MaterialTheme.colorScheme.onPrimary

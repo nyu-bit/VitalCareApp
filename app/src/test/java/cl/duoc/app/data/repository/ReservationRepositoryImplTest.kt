@@ -2,9 +2,8 @@ package cl.duoc.app.data.repository
 
 import cl.duoc.app.model.Reservation
 import cl.duoc.app.model.ReservationStatus
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -12,7 +11,6 @@ import org.junit.Test
 /**
  * Pruebas unitarias para ReservationRepositoryImpl
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class ReservationRepositoryImplTest {
 
     private lateinit var repository: ReservationRepositoryImpl
@@ -23,7 +21,7 @@ class ReservationRepositoryImplTest {
     }
 
     @Test
-    fun `createReservation stores reservation successfully`() = runTest {
+    fun createReservationStoresReservationSuccessfully() = runBlocking {
         val reservation = Reservation(
             id = "1",
             userId = "user1",
@@ -37,7 +35,7 @@ class ReservationRepositoryImplTest {
     }
 
     @Test
-    fun `getReservationById returns correct reservation`() = runTest {
+    fun getReservationByIdReturnsCorrectReservation() = runBlocking {
         val reservation = Reservation(
             id = "1",
             userId = "user1",
@@ -54,7 +52,7 @@ class ReservationRepositoryImplTest {
     }
 
     @Test
-    fun `getReservationsByUserId returns user reservations`() = runTest {
+    fun getReservationsByUserIdReturnsUserReservations() = runBlocking {
         val res1 = Reservation("1", "user1", "Cardiología", "Dr. Smith", System.currentTimeMillis())
         val res2 = Reservation("2", "user1", "Neurología", "Dr. Jones", System.currentTimeMillis())
         val res3 = Reservation("3", "user2", "Pediatría", "Dr. Brown", System.currentTimeMillis())
@@ -68,8 +66,8 @@ class ReservationRepositoryImplTest {
     }
 
     @Test
-    fun `getReservationsByStatus filters correctly`() = runTest {
-        val res1 = Reservation("1", "user1", "Cardiología", "Dr. Smith", 
+    fun getReservationsByStatusFiltersCorrectly() = runBlocking {
+        val res1 = Reservation("1", "user1", "Cardiología", "Dr. Smith",
             System.currentTimeMillis(), ReservationStatus.PENDING)
         val res2 = Reservation("2", "user1", "Neurología", "Dr. Jones", 
             System.currentTimeMillis(), ReservationStatus.CONFIRMED)
@@ -83,7 +81,7 @@ class ReservationRepositoryImplTest {
     }
 
     @Test
-    fun `updateReservation modifies existing reservation`() = runTest {
+    fun updateReservationModifiesExistingReservation() = runBlocking {
         val reservation = Reservation("1", "user1", "Cardiología", "Dr. Smith", System.currentTimeMillis())
         repository.createReservation(reservation)
         
@@ -96,8 +94,8 @@ class ReservationRepositoryImplTest {
     }
 
     @Test
-    fun `cancelReservation changes status to cancelled`() = runTest {
-        val reservation = Reservation("1", "user1", "Cardiología", "Dr. Smith", 
+    fun cancelReservationChangesStatusToCancelled() = runBlocking {
+        val reservation = Reservation("1", "user1", "Cardiología", "Dr. Smith",
             System.currentTimeMillis(), ReservationStatus.PENDING)
         repository.createReservation(reservation)
         
@@ -109,13 +107,13 @@ class ReservationRepositoryImplTest {
     }
 
     @Test
-    fun `cancelReservation fails for non-existing reservation`() = runTest {
+    fun cancelReservationFailsForNonExistingReservation() = runBlocking {
         val result = repository.cancelReservation("nonexistent")
         assertFalse(result)
     }
 
     @Test
-    fun `deleteReservation removes reservation`() = runTest {
+    fun deleteReservationRemovesReservation() = runBlocking {
         val reservation = Reservation("1", "user1", "Cardiología", "Dr. Smith", System.currentTimeMillis())
         repository.createReservation(reservation)
         
@@ -127,7 +125,7 @@ class ReservationRepositoryImplTest {
     }
 
     @Test
-    fun `observeReservations emits updates`() = runTest {
+    fun observeReservationsEmitsUpdates() = runBlocking {
         val reservation = Reservation("1", "user1", "Cardiología", "Dr. Smith", System.currentTimeMillis())
         repository.createReservation(reservation)
         
