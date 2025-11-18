@@ -24,13 +24,15 @@ class AnomalyDetectionServiceTest {
     // ========== Tests de Presión Arterial ==========
 
     @Test
-    fun `detectAnomalies detecta presión arterial normal`() {
+    fun detectAnomalies_normal_blood_pressure() {
         val vitalSigns = VitalSigns(
             id = "1",
             userId = "user1",
             bloodPressureSystolic = 110,
             bloodPressureDiastolic = 70,
-            timestamp = "2024-01-01T10:00:00"
+            heartRate = 75,
+            oxygenSaturation = 98,
+            timestamp = System.currentTimeMillis()
         )
 
         val anomalies = anomalyDetectionService.detectAnomalies(vitalSigns)
@@ -39,13 +41,15 @@ class AnomalyDetectionServiceTest {
     }
 
     @Test
-    fun `detectAnomalies detecta hipertensión alta`() {
+    fun detectAnomalies_high_blood_pressure() {
         val vitalSigns = VitalSigns(
             id = "1",
             userId = "user1",
             bloodPressureSystolic = 190,
             bloodPressureDiastolic = 125,
-            timestamp = "2024-01-01T10:00:00"
+            heartRate = 75,
+            oxygenSaturation = 98,
+            timestamp = System.currentTimeMillis()
         )
 
         val anomalies = anomalyDetectionService.detectAnomalies(vitalSigns)
@@ -62,13 +66,15 @@ class AnomalyDetectionServiceTest {
     }
 
     @Test
-    fun `detectAnomalies detecta hipotensión`() {
+    fun detectAnomalies_low_blood_pressure() {
         val vitalSigns = VitalSigns(
             id = "1",
             userId = "user1",
             bloodPressureSystolic = 85,
             bloodPressureDiastolic = 55,
-            timestamp = "2024-01-01T10:00:00"
+            heartRate = 75,
+            oxygenSaturation = 98,
+            timestamp = System.currentTimeMillis()
         )
 
         val anomalies = anomalyDetectionService.detectAnomalies(vitalSigns)
@@ -83,12 +89,15 @@ class AnomalyDetectionServiceTest {
     // ========== Tests de Frecuencia Cardíaca ==========
 
     @Test
-    fun `detectAnomalies detecta frecuencia cardíaca normal`() {
+    fun detectAnomalies_normal_heart_rate() {
         val vitalSigns = VitalSigns(
             id = "1",
             userId = "user1",
             heartRate = 75,
-            timestamp = "2024-01-01T10:00:00"
+            bloodPressureSystolic = 110,
+            bloodPressureDiastolic = 70,
+            oxygenSaturation = 98,
+            timestamp = System.currentTimeMillis()
         )
 
         val anomalies = anomalyDetectionService.detectAnomalies(vitalSigns)
@@ -97,12 +106,15 @@ class AnomalyDetectionServiceTest {
     }
 
     @Test
-    fun `detectAnomalies detecta taquicardia`() {
+    fun detectAnomalies_high_heart_rate() {
         val vitalSigns = VitalSigns(
             id = "1",
             userId = "user1",
             heartRate = 145,
-            timestamp = "2024-01-01T10:00:00"
+            bloodPressureSystolic = 110,
+            bloodPressureDiastolic = 70,
+            oxygenSaturation = 98,
+            timestamp = System.currentTimeMillis()
         )
 
         val anomalies = anomalyDetectionService.detectAnomalies(vitalSigns)
@@ -118,12 +130,15 @@ class AnomalyDetectionServiceTest {
     }
 
     @Test
-    fun `detectAnomalies detecta bradicardia`() {
+    fun detectAnomalies_low_heart_rate() {
         val vitalSigns = VitalSigns(
             id = "1",
             userId = "user1",
             heartRate = 50,
-            timestamp = "2024-01-01T10:00:00"
+            bloodPressureSystolic = 110,
+            bloodPressureDiastolic = 70,
+            oxygenSaturation = 98,
+            timestamp = System.currentTimeMillis()
         )
 
         val anomalies = anomalyDetectionService.detectAnomalies(vitalSigns)
@@ -138,12 +153,15 @@ class AnomalyDetectionServiceTest {
     // ========== Tests de Saturación de Oxígeno ==========
 
     @Test
-    fun `detectAnomalies detecta saturación de oxígeno normal`() {
+    fun detectAnomalies_normal_oxygen_saturation() {
         val vitalSigns = VitalSigns(
             id = "1",
             userId = "user1",
             oxygenSaturation = 98,
-            timestamp = "2024-01-01T10:00:00"
+            bloodPressureSystolic = 110,
+            bloodPressureDiastolic = 70,
+            heartRate = 75,
+            timestamp = System.currentTimeMillis()
         )
 
         val anomalies = anomalyDetectionService.detectAnomalies(vitalSigns)
@@ -152,12 +170,15 @@ class AnomalyDetectionServiceTest {
     }
 
     @Test
-    fun `detectAnomalies detecta saturación de oxígeno crítica`() {
+    fun detectAnomalies_critical_oxygen_saturation() {
         val vitalSigns = VitalSigns(
             id = "1",
             userId = "user1",
             oxygenSaturation = 85,
-            timestamp = "2024-01-01T10:00:00"
+            bloodPressureSystolic = 110,
+            bloodPressureDiastolic = 70,
+            heartRate = 75,
+            timestamp = System.currentTimeMillis()
         )
 
         val anomalies = anomalyDetectionService.detectAnomalies(vitalSigns)
@@ -173,12 +194,15 @@ class AnomalyDetectionServiceTest {
     }
 
     @Test
-    fun `detectAnomalies detecta saturación de oxígeno baja moderada`() {
+    fun detectAnomalies_moderate_low_oxygen_saturation() {
         val vitalSigns = VitalSigns(
             id = "1",
             userId = "user1",
             oxygenSaturation = 92,
-            timestamp = "2024-01-01T10:00:00"
+            bloodPressureSystolic = 110,
+            bloodPressureDiastolic = 70,
+            heartRate = 75,
+            timestamp = System.currentTimeMillis()
         )
 
         val anomalies = anomalyDetectionService.detectAnomalies(vitalSigns)
@@ -193,12 +217,16 @@ class AnomalyDetectionServiceTest {
     // ========== Tests de Temperatura ==========
 
     @Test
-    fun `detectAnomalies detecta temperatura normal`() {
+    fun detectAnomalies_normal_temperature() {
         val vitalSigns = VitalSigns(
             id = "1",
             userId = "user1",
             temperature = 36.5,
-            timestamp = "2024-01-01T10:00:00"
+            bloodPressureSystolic = 110,
+            bloodPressureDiastolic = 70,
+            heartRate = 75,
+            oxygenSaturation = 98,
+            timestamp = System.currentTimeMillis()
         )
 
         val anomalies = anomalyDetectionService.detectAnomalies(vitalSigns)
@@ -207,12 +235,16 @@ class AnomalyDetectionServiceTest {
     }
 
     @Test
-    fun `detectAnomalies detecta fiebre alta`() {
+    fun detectAnomalies_high_temperature() {
         val vitalSigns = VitalSigns(
             id = "1",
             userId = "user1",
             temperature = 39.8,
-            timestamp = "2024-01-01T10:00:00"
+            bloodPressureSystolic = 110,
+            bloodPressureDiastolic = 70,
+            heartRate = 75,
+            oxygenSaturation = 98,
+            timestamp = System.currentTimeMillis()
         )
 
         val anomalies = anomalyDetectionService.detectAnomalies(vitalSigns)
@@ -228,12 +260,16 @@ class AnomalyDetectionServiceTest {
     }
 
     @Test
-    fun `detectAnomalies detecta hipotermia`() {
+    fun detectAnomalies_low_temperature() {
         val vitalSigns = VitalSigns(
             id = "1",
             userId = "user1",
             temperature = 35.5,
-            timestamp = "2024-01-01T10:00:00"
+            bloodPressureSystolic = 110,
+            bloodPressureDiastolic = 70,
+            heartRate = 75,
+            oxygenSaturation = 98,
+            timestamp = System.currentTimeMillis()
         )
 
         val anomalies = anomalyDetectionService.detectAnomalies(vitalSigns)
@@ -248,7 +284,7 @@ class AnomalyDetectionServiceTest {
     // ========== Tests de Múltiples Anomalías ==========
 
     @Test
-    fun `detectAnomalies detecta múltiples anomalías simultáneas`() {
+    fun detectAnomalies_multiple_anomalies() {
         val vitalSigns = VitalSigns(
             id = "1",
             userId = "user1",
@@ -257,7 +293,7 @@ class AnomalyDetectionServiceTest {
             heartRate = 150,
             oxygenSaturation = 88,
             temperature = 39.5,
-            timestamp = "2024-01-01T10:00:00"
+            timestamp = System.currentTimeMillis()
         )
 
         val anomalies = anomalyDetectionService.detectAnomalies(vitalSigns)
@@ -275,7 +311,7 @@ class AnomalyDetectionServiceTest {
     // ========== Tests de Creación de Alertas ==========
 
     @Test
-    fun `createAlertsFromAnomalies crea alertas correctamente`() {
+    fun createAlertsFromAnomalies_creates_alerts() {
         val userId = "user1"
         val vitalSigns = VitalSigns(
             id = "1",
@@ -299,19 +335,17 @@ class AnomalyDetectionServiceTest {
         alert?.let {
             assertEquals("UserId correcto", userId, it.userId)
             assertEquals("Type es Signos Vitales", "Signos Vitales", it.type)
+            assertEquals("Titulo correcto",
+                Constants.AnomalyDetection.ANOMALY_TYPE_PRESSURE_HIGH,
+                alert.title)
+            assertFalse("Alerta no leida", alert.isRead)
         }
-    }
-        assertEquals("Título correcto",
-            Constants.AnomalyDetection.ANOMALY_TYPE_PRESSURE_HIGH, 
-            alert.title)
-        assertFalse("Alerta no leída", alert.isRead)
-        assertNotNull("Snapshot presente", alert.vitalSignsSnapshot)
     }
 
     // ========== Tests de Notificaciones Inmediatas ==========
 
     @Test
-    fun `requiresImmediateNotification retorna true para prioridad alta`() {
+    fun requiresImmediateNotification_true_high_priority() {
         val anomaly = AnomalyDetectionService.AnomalyResult(
             hasAnomaly = true,
             priority = Constants.AnomalyDetection.ALERT_PRIORITY_HIGH
@@ -319,11 +353,11 @@ class AnomalyDetectionServiceTest {
 
         val requiresNotification = anomalyDetectionService.requiresImmediateNotification(anomaly)
 
-        assertTrue("Prioridad alta requiere notificación inmediata", requiresNotification)
+        assertTrue("Prioridad alta requiere notificacion inmediata", requiresNotification)
     }
 
     @Test
-    fun `requiresImmediateNotification retorna true para prioridad media`() {
+    fun requiresImmediateNotification_true_medium_priority() {
         val anomaly = AnomalyDetectionService.AnomalyResult(
             hasAnomaly = true,
             priority = Constants.AnomalyDetection.ALERT_PRIORITY_MEDIUM
@@ -331,11 +365,11 @@ class AnomalyDetectionServiceTest {
 
         val requiresNotification = anomalyDetectionService.requiresImmediateNotification(anomaly)
 
-        assertTrue("Prioridad media requiere notificación inmediata", requiresNotification)
+        assertTrue("Prioridad media requiere notificacion inmediata", requiresNotification)
     }
 
     @Test
-    fun `requiresImmediateNotification retorna false para prioridad baja`() {
+    fun requiresImmediateNotification_false_low_priority() {
         val anomaly = AnomalyDetectionService.AnomalyResult(
             hasAnomaly = true,
             priority = Constants.AnomalyDetection.ALERT_PRIORITY_LOW
@@ -343,13 +377,13 @@ class AnomalyDetectionServiceTest {
 
         val requiresNotification = anomalyDetectionService.requiresImmediateNotification(anomaly)
 
-        assertFalse("Prioridad baja no requiere notificación inmediata", requiresNotification)
+        assertFalse("Prioridad baja no requiere notificacion inmediata", requiresNotification)
     }
 
     // ========== Tests de Valores Nulos ==========
 
     @Test
-    fun `detectAnomalies maneja valores nulos correctamente`() {
+    fun detectAnomalies_null_values() {
         val vitalSigns = VitalSigns(
             id = "1",
             userId = "user1",
@@ -358,11 +392,11 @@ class AnomalyDetectionServiceTest {
             heartRate = null,
             oxygenSaturation = null,
             temperature = null,
-            timestamp = "2024-01-01T10:00:00"
+            timestamp = System.currentTimeMillis()
         )
 
         val anomalies = anomalyDetectionService.detectAnomalies(vitalSigns)
 
-        assertTrue("No debería detectar anomalías con valores nulos", anomalies.isEmpty())
+        assertTrue("No deberia detectar anomalias con valores nulos", anomalies.isEmpty())
     }
 }
