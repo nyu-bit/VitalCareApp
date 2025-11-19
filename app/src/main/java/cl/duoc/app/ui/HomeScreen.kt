@@ -2,6 +2,8 @@ package cl.duoc.app.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,67 +14,296 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    viewModel: HomeViewModel = viewModel(),
     onPrimaryAction: () -> Unit,
     onSecondaryAction: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Home") })
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
+    val counter by viewModel.counter.collectAsState()
+    val pacientes by viewModel.pacientes.collectAsState(initial = emptyList())
+    val especialidades by viewModel.especialidades.collectAsState(initial = emptyList())
+    val citas by viewModel.citas.collectAsState(initial = emptyList())
+    val isLoading by viewModel.isLoading.collectAsState()
+    val message by viewModel.message.collectAsState()
 
-            // Imagen del logo (recurso en drawable)
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Logo",
+    MaterialTheme {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("VitalCare") },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                )
+            },
+            snackbarHost = {
+                message?.let {
+                    Snackbar(
+                        modifier = Modifier.padding(16.dp),
+                        action = {
+                            TextButton(onClick = { viewModel.clearMessage() }) {
+                                Text("OK")
+                            }
+                        }
+                    ) {
+                        Text(it)
+                    }
+                }
+            }
+        ) { innerPadding ->
+            LazyColumn(
                 modifier = Modifier
-                    .size(120.dp),
-                contentScale = ContentScale.Fit
-            )
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Header con logo
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.logo),
+                            contentDescription = "Logo VitalCare",
+                            modifier = Modifier.size(100.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Text(
+                            text = "Bienvenido a VitalCare",
+                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        
+                        Text(
+                            text = "Sistema de reserva de horas médicas",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
 
-            // Título principal
+                // Contador de acciones
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Contador de acciones",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Text(
+                                text = "$counter",
+                                style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+
+                // Botones de acción
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Button(
+                            onClick = onPrimaryAction,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) { Text("Incrementar") }
+
+                        OutlinedButton(
+                            onClick = onSecondaryAction,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) { Text("Reiniciar") }
+                    }
+                }
+
+                // Estadísticas de la base de datos
+                item {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    } else {
+                        DatabaseStatsCard(
+                            pacientesCount = pacientes.size,
+                            especialidadesCount = especialidades.size,
+                            citasCount = citas.size
+                        )
+                    }
+                }
+
+                // Lista de especialidades
+                if (especialidades.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Especialidades Disponibles",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    items(especialidades) { especialidad ->
+                        EspecialidadCard(
+                            nombre = especialidad.nombre,
+                            descripcion = especialidad.descripcion,
+                            duracion = especialidad.duracionConsulta
+                        )
+                    }
+                }
+
+                // Lista de pacientes
+                if (pacientes.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Pacientes Registrados",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+
+                    items(pacientes) { paciente ->
+                        PacienteCard(
+                            nombre = "${paciente.nombre} ${paciente.apellido}",
+                            rut = paciente.rut,
+                            email = paciente.email
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DatabaseStatsCard(
+    pacientesCount: Int,
+    especialidadesCount: Int,
+    citasCount: Int
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
             Text(
-                text = "Bienvenido",
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary // usar MaterialTheme (Parte 2.5)
+                text = "📊 Estadísticas de la Base de Datos",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSecondaryContainer
             )
-
-            // Subtítulo / descripción
-            Text(
-                text = "Pantalla base con Jetpack Compose",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            // Botones de acción
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Button(
-                    onClick = onPrimaryAction,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp)
-                ) { Text("Acción") }
-
-                OutlinedButton(
-                    onClick = onSecondaryAction,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp)
-                ) { Text("Secundaria") }
+                StatItem("Pacientes", pacientesCount)
+                StatItem("Especialidades", especialidadesCount)
+                StatItem("Citas", citasCount)
             }
+        }
+    }
+}
+
+@Composable
+fun StatItem(label: String, count: Int) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = "$count",
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+    }
+}
+
+@Composable
+fun EspecialidadCard(nombre: String, descripcion: String, duracion: Int) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Text(
+                text = nombre,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = descripcion,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "⏱️ $duracion minutos",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+fun PacienteCard(nombre: String, rut: String, email: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Text(
+                text = nombre,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "RUT: $rut",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "📧 $email",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
@@ -80,7 +311,10 @@ fun HomeScreen(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen(onPrimaryAction = { /*TODO*/ }) {
-
+    MaterialTheme {
+        HomeScreen(
+            onPrimaryAction = { },
+            onSecondaryAction = { }
+        )
     }
 }
