@@ -1,5 +1,7 @@
 package cl.duoc.app.ui.pacientes
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,6 +18,7 @@ import androidx.lifecycle.viewModelScope
 import cl.duoc.app.data.entity.Paciente
 import cl.duoc.app.ui.HomeViewModel
 import cl.duoc.app.utils.Validators
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,8 +51,15 @@ fun PacienteFormScreen(
     
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
+    var showSuccessAnimation by remember { mutableStateOf(false) }
+    var isFormVisible by remember { mutableStateOf(false) }
     
     val snackbarHostState = remember { SnackbarHostState() }
+    
+    LaunchedEffect(Unit) {
+        delay(100)
+        isFormVisible = true
+    }
 
     Scaffold(
         topBar = {
@@ -109,9 +119,10 @@ fun PacienteFormScreen(
                         viewModel.viewModelScope.launch {
                             try {
                                 viewModel.insertPaciente(paciente)
+                                showSuccessAnimation = true
                                 snackbarMessage = "✅ Paciente registrado exitosamente"
                                 showSnackbar = true
-                                kotlinx.coroutines.delay(1500)
+                                delay(1500)
                                 onSaveSuccess()
                             } catch (e: Exception) {
                                 snackbarMessage = "❌ Error: ${e.message}"
@@ -137,16 +148,24 @@ fun PacienteFormScreen(
             }
         }
         
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        AnimatedVisibility(
+            visible = isFormVisible,
+            enter = fadeIn(animationSpec = tween(400)) + 
+                    slideInVertically(
+                        animationSpec = tween(400),
+                        initialOffsetY = { it / 4 }
+                    )
         ) {
-            Text(
-                text = "Complete los datos del paciente",
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Complete los datos del paciente",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -308,6 +327,32 @@ fun PacienteFormScreen(
             )
             
             Spacer(modifier = Modifier.height(80.dp)) // Espacio para el FAB
+            }
+        }
+        
+        // Animación de éxito
+        if (showSuccessAnimation) {
+            AnimatedVisibility(
+                visible = true,
+                enter = scaleIn(animationSpec = tween(300)) + fadeIn(),
+                exit = scaleOut(animationSpec = tween(300)) + fadeOut()
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = androidx.compose.ui.Alignment.Center
+                    ) {
+                        Text(
+                            text = "✓",
+                            style = MaterialTheme.typography.displayLarge,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+            }
         }
     }
 }
