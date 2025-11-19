@@ -17,6 +17,10 @@ class CitaRepository(private val citaDao: CitaDao) {
         return citaDao.getCitaByIdFlow(id)
     }
     
+    suspend fun getCitaByIdSync(id: Long): Cita? {
+        return citaDao.getCitaById(id)
+    }
+    
     fun getCitasByPaciente(pacienteId: Long): Flow<List<Cita>> {
         return citaDao.getCitasByPaciente(pacienteId)
     }

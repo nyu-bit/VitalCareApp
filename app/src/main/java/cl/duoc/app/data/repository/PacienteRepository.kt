@@ -17,6 +17,10 @@ class PacienteRepository(private val pacienteDao: PacienteDao) {
         return pacienteDao.getPacienteByIdFlow(id)
     }
     
+    suspend fun getPacienteByIdSync(id: Long): Paciente? {
+        return pacienteDao.getPacienteById(id)
+    }
+    
     suspend fun getPacienteByRut(rut: String): Paciente? {
         return pacienteDao.getPacienteByRut(rut)
     }

@@ -141,4 +141,32 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     fun clearMessage() {
         _message.value = null
     }
+    
+    /**
+     * Inserta un nuevo paciente
+     */
+    suspend fun insertPaciente(paciente: Paciente): Long {
+        return pacienteRepository.insert(paciente)
+    }
+    
+    /**
+     * Inserta una nueva cita
+     */
+    suspend fun insertCita(cita: Cita): Long {
+        return citaRepository.insert(cita)
+    }
+    
+    /**
+     * Obtiene un paciente por ID
+     */
+    suspend fun getPacienteById(id: Long): Paciente? {
+        return pacienteRepository.getPacienteByIdSync(id)
+    }
+    
+    /**
+     * Obtiene una cita por ID
+     */
+    suspend fun getCitaById(id: Long): Cita? {
+        return citaRepository.getCitaByIdSync(id)
+    }
 }

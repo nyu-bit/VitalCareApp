@@ -9,6 +9,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import cl.duoc.app.ui.HomeScreen
 import cl.duoc.app.ui.HomeViewModel
+import cl.duoc.app.ui.pacientes.PacienteFormScreen
+import cl.duoc.app.ui.pacientes.PacientesListScreen
 
 /**
  * NavHost principal de la aplicación
@@ -131,25 +133,6 @@ fun VitalCareNavHost(
 }
 
 // Placeholders temporales - se implementarán en el siguiente paso
-@Composable
-private fun PacientesListScreen(
-    viewModel: HomeViewModel,
-    onNavigateBack: () -> Unit,
-    onPacienteClick: (Long) -> Unit,
-    onAddPaciente: () -> Unit
-) {
-    // TODO: Implementar
-}
-
-@Composable
-private fun PacienteFormScreen(
-    viewModel: HomeViewModel,
-    onNavigateBack: () -> Unit,
-    onSaveSuccess: () -> Unit
-) {
-    // TODO: Implementar
-}
-
 @Composable
 private fun PacienteDetailScreen(
     pacienteId: Long,
