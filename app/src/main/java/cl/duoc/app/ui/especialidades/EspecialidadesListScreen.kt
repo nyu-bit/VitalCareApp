@@ -6,7 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,20 +25,20 @@ fun EspecialidadesListScreen(
     onNavigateBack: () -> Unit
 ) {
     val especialidades by viewModel.especialidades.collectAsState(initial = emptyList())
-    var isVisible by remember { mutableStateOf(false) }
-    
+    var isScreenVisible by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         delay(100)
-        isVisible = true
+        isScreenVisible = true
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Especialidades Médicas") },
+                title = { Text("Especialidades Disponibles") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, "Volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -47,27 +48,35 @@ fun EspecialidadesListScreen(
             )
         }
     ) { paddingValues ->
-        AnimatedVisibility(
-            visible = isVisible,
-            enter = fadeIn(animationSpec = tween(500)) + 
-                    slideInVertically(animationSpec = tween(500))
-        ) {
-            if (especialidades.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
+        if (especialidades.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            "No hay especialidades registradas",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Sin datos",
+                        modifier = Modifier.size(64.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "No hay especialidades disponibles",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                 }
-            } else {
+            }
+        } else {
+            AnimatedVisibility(
+                visible = isScreenVisible,
+                enter = fadeIn(animationSpec = tween(500))
+            ) {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -78,31 +87,31 @@ fun EspecialidadesListScreen(
                     item {
                         Text(
                             text = "${especialidades.size} especialidad(es) disponible(s)",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
-                    
+
                     itemsIndexed(
                         items = especialidades,
                         key = { _, especialidad -> especialidad.id }
                     ) { index, especialidad ->
                         var isItemVisible by remember { mutableStateOf(false) }
-                        
+
                         LaunchedEffect(Unit) {
                             delay(index * 50L)
                             isItemVisible = true
                         }
-                        
+
                         AnimatedVisibility(
                             visible = isItemVisible,
                             enter = fadeIn(animationSpec = tween(300)) +
                                     slideInHorizontally(
                                         animationSpec = tween(300),
-                                        initialOffsetX = { it / 2 }
+                                        initialOffsetX = { -it }
                                     )
                         ) {
-                            EspecialidadCard(especialidad = especialidad)
+                            EspecialidadCard(especialidad)
                         }
                     }
                 }
@@ -117,7 +126,8 @@ fun EspecialidadCard(especialidad: Especialidad) {
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -127,47 +137,50 @@ fun EspecialidadCard(especialidad: Especialidad) {
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Text(
                 text = especialidad.descripcion,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
-            
+
             Spacer(modifier = Modifier.height(12.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = androidx.compose.material.icons.Icons.Default.ArrowBack,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${especialidad.duracionConsulta} min",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                
-                if (especialidad.activo) {
+                Text(
+                    text = "⏱️ ${especialidad.duracionConsulta} min",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                if (especialidad.activa) {
                     Surface(
                         color = MaterialTheme.colorScheme.primaryContainer,
                         shape = MaterialTheme.shapes.small
                     ) {
                         Text(
-                            text = "Disponible",
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            text = "✓ Activa",
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                } else {
+                    Surface(
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        shape = MaterialTheme.shapes.small
+                    ) {
+                        Text(
+                            text = "✗ Inactiva",
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onErrorContainer
                         )
                     }
                 }
@@ -175,3 +188,4 @@ fun EspecialidadCard(especialidad: Especialidad) {
         }
     }
 }
+

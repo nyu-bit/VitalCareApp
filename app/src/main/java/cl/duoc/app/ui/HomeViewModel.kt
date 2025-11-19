@@ -18,20 +18,20 @@ import kotlinx.coroutines.launch
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
     
     // Base de datos y repositorios
-    private val database = VitalCareDatabase.getDatabase(application)
-    private val pacienteRepository = PacienteRepository(database.pacienteDao())
-    private val especialidadRepository = EspecialidadRepository(database.especialidadDao())
-    private val citaRepository = CitaRepository(database.citaDao())
-    
+    private val database by lazy { VitalCareDatabase.getDatabase(application) }
+    private val pacienteRepository by lazy { PacienteRepository(database.pacienteDao()) }
+    private val especialidadRepository by lazy { EspecialidadRepository(database.especialidadDao()) }
+    private val citaRepository by lazy { CitaRepository(database.citaDao()) }
+
     // Contador de ejemplo
     private val _counter = MutableStateFlow(0)
     val counter = _counter.asStateFlow()
     
     // Flows observables desde la base de datos
-    val pacientes = pacienteRepository.pacientesActivos
-    val especialidades = especialidadRepository.especialidadesActivas
-    val citas = citaRepository.todasCitas
-    
+    val pacientes by lazy { pacienteRepository.pacientesActivos }
+    val especialidades by lazy { especialidadRepository.especialidadesActivas }
+    val citas by lazy { citaRepository.todasCitas }
+
     // Estado de carga
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
@@ -41,7 +41,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val message = _message.asStateFlow()
     
     init {
-        // Inicializar con datos de ejemplo si la base de datos está vacía
         initializeSampleData()
     }
     
@@ -53,14 +52,10 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         _counter.value = 0 
     }
     
-    /**
-     * Inicializa la base de datos con datos de ejemplo
-     */
     private fun initializeSampleData() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                // Insertar especialidades de ejemplo
                 val especialidades = listOf(
                     Especialidad(
                         nombre = "Psicología",
@@ -80,7 +75,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 )
                 especialidadRepository.insertAll(especialidades)
                 
-                // Insertar pacientes de ejemplo
                 val pacientes = listOf(
                     Paciente(
                         rut = "12345678-9",
@@ -103,7 +97,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 )
                 pacienteRepository.insertAll(pacientes)
                 
-                // Insertar citas de ejemplo
                 val citas = listOf(
                     Cita(
                         pacienteId = 1,
@@ -126,46 +119,31 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 )
                 citaRepository.insertAll(citas)
                 
-                _message.value = "✅ Base de datos inicializada con datos de ejemplo"
+                _message.value = "✅ Base de datos inicializada"
             } catch (e: Exception) {
-                _message.value = "❌ Error al inicializar: ${e.message}"
+                _message.value = "❌ Error: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
         }
     }
     
-    /**
-     * Limpia el mensaje de feedback
-     */
     fun clearMessage() {
         _message.value = null
     }
     
-    /**
-     * Inserta un nuevo paciente
-     */
     suspend fun insertPaciente(paciente: Paciente): Long {
         return pacienteRepository.insert(paciente)
     }
     
-    /**
-     * Inserta una nueva cita
-     */
     suspend fun insertCita(cita: Cita): Long {
         return citaRepository.insert(cita)
     }
     
-    /**
-     * Obtiene un paciente por ID
-     */
     suspend fun getPacienteById(id: Long): Paciente? {
         return pacienteRepository.getPacienteByIdSync(id)
     }
     
-    /**
-     * Obtiene una cita por ID
-     */
     suspend fun getCitaById(id: Long): Cita? {
         return citaRepository.getCitaByIdSync(id)
     }

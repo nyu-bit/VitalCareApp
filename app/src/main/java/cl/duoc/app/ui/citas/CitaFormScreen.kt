@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import cl.duoc.app.data.entity.Cita
+import cl.duoc.app.data.entity.EstadoCita as EstadoEnum
 import cl.duoc.app.ui.HomeViewModel
 import cl.duoc.app.utils.Validators
 import cl.duoc.app.utils.LocationHelper
@@ -34,25 +35,26 @@ fun CitaFormScreen(
 ) {
     var fecha by remember { mutableStateOf("") }
     var fechaError by remember { mutableStateOf<String?>(null) }
-    
+
     var hora by remember { mutableStateOf("") }
     var horaError by remember { mutableStateOf<String?>(null) }
-    
+
     var observaciones by remember { mutableStateOf("") }
-    var estado by remember { mutableStateOf("pendiente") }
+    var estado by remember { mutableStateOf(EstadoEnum.PENDIENTE) }
     var ubicacion by remember { mutableStateOf<String?>(null) }
     var isLoadingLocation by remember { mutableStateOf(false) }
-    
+
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
     var showSuccessAnimation by remember { mutableStateOf(false) }
     var isFormVisible by remember { mutableStateOf(false) }
-    
+    var expandedEstado by remember { mutableStateOf(false) }
+
     val context = LocalContext.current
     val locationHelper = remember { LocationHelper(context) }
     val notificationHelper = remember { NotificationHelper(context) }
     val snackbarHostState = remember { SnackbarHostState() }
-    
+
     LaunchedEffect(Unit) {
         delay(100)
         isFormVisible = true
@@ -64,7 +66,7 @@ fun CitaFormScreen(
                 title = { Text("Registrar Cita") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, "Volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -73,71 +75,11 @@ fun CitaFormScreen(
                 )
             )
         },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    val fechaValidation = Validators.validateDate(fecha)
-                    val horaValidation = Validators.validateTime(hora)
-                    
-                    fechaError = fechaValidation.errorMessage
-                    horaError = horaValidation.errorMessage
-                    
-                    val isFormValid = fechaValidation.isValid && horaValidation.isValid
-                    
-                    if (isFormValid) {
-                        val cita = Cita(
-                            pacienteId = 1, // TODO: Seleccionar paciente
-                            especialidadId = 1, // TODO: Seleccionar especialidad
-                            fecha = fecha,
-                            hora = hora,
-                            estado = estado,
-                            observaciones = observaciones.trim(),
-                            ubicacion = ubicacion
-                        )
-                        
-                        viewModel.viewModelScope.launch {
-                            try {
-                                val citaId = viewModel.insertCita(cita)
-                                
-                                // Mostrar notificación de confirmación
-                                notificationHelper.showCitaConfirmationNotification(
-                                    citaId = citaId,
-                                    fecha = fecha,
-                                    hora = hora
-                                )
-                                
-                                showSuccessAnimation = true
-                                snackbarMessage = "✅ Cita registrada exitosamente"
-                                showSnackbar = true
-                                delay(1500)
-                                onSaveSuccess()
-                            } catch (e: Exception) {
-                                snackbarMessage = "❌ Error: ${e.message}"
-                                showSnackbar = true
-                            }
-                        }
-                    } else {
-                        snackbarMessage = "⚠️ Por favor corrija los errores en el formulario"
-                        showSnackbar = true
-                    }
-                },
-                icon = { Icon(Icons.Default.Check, "Guardar") },
-                text = { Text("Guardar Cita") }
-            )
-        },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        
-        LaunchedEffect(showSnackbar) {
-            if (showSnackbar) {
-                snackbarHostState.showSnackbar(snackbarMessage)
-                showSnackbar = false
-            }
-        }
-        
         AnimatedVisibility(
             visible = isFormVisible,
-            enter = fadeIn(animationSpec = tween(400)) + 
+            enter = fadeIn(animationSpec = tween(400)) +
                     slideInVertically(
                         animationSpec = tween(400),
                         initialOffsetY = { it / 4 }
@@ -156,11 +98,11 @@ fun CitaFormScreen(
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
-                
+
                 // Campo Fecha
                 OutlinedTextField(
                     value = fecha,
-                    onValueChange = { 
+                    onValueChange = {
                         fecha = it
                         if (it.isNotBlank()) {
                             fechaError = Validators.validateDate(it).errorMessage
@@ -177,14 +119,13 @@ fun CitaFormScreen(
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
-                
+
                 // Campo Hora
                 OutlinedTextField(
                     value = hora,
-                    onValueChange = { 
+                    onValueChange = {
                         hora = it
                         if (it.isNotBlank()) {
                             horaError = Validators.validateTime(it).errorMessage
@@ -201,46 +142,41 @@ fun CitaFormScreen(
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
-                
-                // Campo Estado
-                var expanded by remember { mutableStateOf(false) }
-                val estados = listOf("pendiente", "confirmada", "completada", "cancelada")
-                
+
+                // Dropdown de Estados
                 ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
+                    expanded = expandedEstado,
+                    onExpandedChange = { expandedEstado = !expandedEstado }
                 ) {
-                    OutlinedTextField(
-                        value = estado,
+                    TextField(
+                        value = estado.name,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Estado *") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        label = { Text("Estado") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEstado) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .menuAnchor(),
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                            .menuAnchor()
                     )
-                    
+
                     ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        expanded = expandedEstado,
+                        onDismissRequest = { expandedEstado = false }
                     ) {
-                        estados.forEach { estadoOption ->
+                        listOf(EstadoEnum.PENDIENTE, EstadoEnum.CONFIRMADA, EstadoEnum.COMPLETADA, EstadoEnum.CANCELADA).forEach { option ->
                             DropdownMenuItem(
-                                text = { Text(estadoOption.uppercase()) },
+                                text = { Text(option.name) },
                                 onClick = {
-                                    estado = estadoOption
-                                    expanded = false
+                                    estado = option
+                                    expandedEstado = false
                                 }
                             )
                         }
                     }
                 }
-                
+
                 // Campo Observaciones
                 OutlinedTextField(
                     value = observaciones,
@@ -248,126 +184,109 @@ fun CitaFormScreen(
                     label = { Text("Observaciones") },
                     placeholder = { Text("Notas adicionales sobre la cita...") },
                     modifier = Modifier.fillMaxWidth(),
-                    minLines = 3,
-                    maxLines = 5
+                    minLines = 3
                 )
-                
-                // Botón GPS
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.7f)
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "📍 Ubicación GPS",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer
-                                )
-                                if (ubicacion != null) {
-                                    Text(
-                                        text = "Guardada",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                } else {
-                                    Text(
-                                        text = "No capturada",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.6f)
-                                    )
+
+                // Botón para obtener ubicación
+                ElevatedButton(
+                    onClick = {
+                        isLoadingLocation = true
+                        viewModel.viewModelScope.launch {
+                            if (locationHelper.hasLocationPermission()) {
+                                val location = locationHelper.getCurrentLocation()
+                                ubicacion = location?.let {
+                                    locationHelper.formatCoordinates(it)
                                 }
                             }
-                            
-                            Button(
-                                onClick = {
-                                    if (locationHelper.hasLocationPermission()) {
-                                        isLoadingLocation = true
-                                        viewModel.viewModelScope.launch {
-                                            val location = locationHelper.getCurrentLocation()
-                                            if (location != null) {
-                                                ubicacion = locationHelper.formatCoordinates(location)
-                                                snackbarMessage = "📍 Ubicación capturada"
-                                            } else {
-                                                snackbarMessage = "⚠️ No se pudo obtener la ubicación"
-                                            }
-                                            showSnackbar = true
-                                            isLoadingLocation = false
-                                        }
-                                    } else {
-                                        snackbarMessage = "⚠️ Permiso de ubicación no otorgado"
-                                        showSnackbar = true
-                                    }
-                                },
-                                enabled = !isLoadingLocation
-                            ) {
-                                if (isLoadingLocation) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(20.dp),
-                                        strokeWidth = 2.dp,
-                                        color = MaterialTheme.colorScheme.onPrimary
+                            isLoadingLocation = false
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoadingLocation
+                ) {
+                    if (isLoadingLocation) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Icon(Icons.Default.LocationOn, "Obtener ubicación")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Obtener Ubicación")
+                }
+
+                if (!ubicacion.isNullOrBlank()) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = MaterialTheme.shapes.small,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "📍 $ubicacion",
+                            modifier = Modifier.padding(12.dp),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Botón Guardar
+                ElevatedButton(
+                    onClick = {
+                        val fechaValidation = Validators.validateDate(fecha)
+                        val horaValidation = Validators.validateTime(hora)
+
+                        fechaError = fechaValidation.errorMessage
+                        horaError = horaValidation.errorMessage
+
+                        val isFormValid = fechaValidation.isValid && horaValidation.isValid
+
+                        if (isFormValid) {
+                            val cita = Cita(
+                                pacienteId = 1,
+                                especialidadId = 1,
+                                fecha = fecha,
+                                hora = hora,
+                                estado = estado,
+                                motivo = "Cita médica",
+                                observaciones = observaciones.trim(),
+                                ubicacion = ubicacion
+                            )
+
+                            viewModel.viewModelScope.launch {
+                                try {
+                                    val citaId = viewModel.insertCita(cita)
+
+                                    notificationHelper.showCitaConfirmationNotification(
+                                        citaId = citaId,
+                                        fecha = fecha,
+                                        hora = hora
                                     )
-                                } else {
-                                    Icon(
-                                        Icons.Default.LocationOn,
-                                        contentDescription = "Capturar GPS"
-                                    )
+
+                                    showSuccessAnimation = true
+                                    snackbarMessage = "✅ Cita registrada exitosamente"
+                                    showSnackbar = true
+                                    delay(1500)
+                                    onSaveSuccess()
+                                } catch (e: Exception) {
+                                    snackbarMessage = "❌ Error: ${e.message}"
+                                    showSnackbar = true
                                 }
                             }
                         }
-                    }
-                }
-                
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
-                    )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
                 ) {
-                    Text(
-                        text = "ℹ️ Nota: En futuras versiones se podrá seleccionar el paciente y la especialidad",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.padding(12.dp)
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(80.dp))
-            }
-        }
-        
-        // Animación de éxito
-        if (showSuccessAnimation) {
-            AnimatedVisibility(
-                visible = true,
-                enter = scaleIn(animationSpec = tween(300)) + fadeIn(),
-                exit = scaleOut(animationSpec = tween(300)) + fadeOut()
-            ) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = androidx.compose.ui.Alignment.Center
-                    ) {
-                        Text(
-                            text = "✓",
-                            style = MaterialTheme.typography.displayLarge,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
+                    Icon(Icons.Default.Check, "Guardar")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Guardar Cita")
                 }
             }
         }
     }
 }
+

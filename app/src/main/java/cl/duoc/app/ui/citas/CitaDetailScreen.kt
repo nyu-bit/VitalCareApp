@@ -6,13 +6,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
+import cl.duoc.app.data.entity.EstadoCita as EstadoEnum
 import cl.duoc.app.ui.HomeViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -41,7 +42,7 @@ fun CitaDetailScreen(
                 title = { Text("Detalle de la Cita") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, "Volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -82,10 +83,10 @@ fun CitaDetailScreen(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
                             containerColor = when (cita!!.estado) {
-                                "pendiente" -> MaterialTheme.colorScheme.primaryContainer
-                                "confirmada" -> MaterialTheme.colorScheme.tertiaryContainer
-                                "completada" -> MaterialTheme.colorScheme.secondaryContainer
-                                else -> MaterialTheme.colorScheme.errorContainer
+                                EstadoEnum.PENDIENTE -> MaterialTheme.colorScheme.primaryContainer
+                                EstadoEnum.CONFIRMADA -> MaterialTheme.colorScheme.tertiaryContainer
+                                EstadoEnum.COMPLETADA -> MaterialTheme.colorScheme.secondaryContainer
+                                EstadoEnum.CANCELADA -> MaterialTheme.colorScheme.errorContainer
                             }
                         )
                     ) {
@@ -96,20 +97,20 @@ fun CitaDetailScreen(
                                 text = "📅 ${cita!!.fecha}",
                                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                                 color = when (cita!!.estado) {
-                                    "pendiente" -> MaterialTheme.colorScheme.onPrimaryContainer
-                                    "confirmada" -> MaterialTheme.colorScheme.onTertiaryContainer
-                                    "completada" -> MaterialTheme.colorScheme.onSecondaryContainer
-                                    else -> MaterialTheme.colorScheme.onErrorContainer
+                                    EstadoEnum.PENDIENTE -> MaterialTheme.colorScheme.onPrimaryContainer
+                                    EstadoEnum.CONFIRMADA -> MaterialTheme.colorScheme.onTertiaryContainer
+                                    EstadoEnum.COMPLETADA -> MaterialTheme.colorScheme.onSecondaryContainer
+                                    EstadoEnum.CANCELADA -> MaterialTheme.colorScheme.onErrorContainer
                                 }
                             )
                             Text(
                                 text = "🕐 ${cita!!.hora}",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = when (cita!!.estado) {
-                                    "pendiente" -> MaterialTheme.colorScheme.onPrimaryContainer
-                                    "confirmada" -> MaterialTheme.colorScheme.onTertiaryContainer
-                                    "completada" -> MaterialTheme.colorScheme.onSecondaryContainer
-                                    else -> MaterialTheme.colorScheme.onErrorContainer
+                                    EstadoEnum.PENDIENTE -> MaterialTheme.colorScheme.onPrimaryContainer
+                                    EstadoEnum.CONFIRMADA -> MaterialTheme.colorScheme.onTertiaryContainer
+                                    EstadoEnum.COMPLETADA -> MaterialTheme.colorScheme.onSecondaryContainer
+                                    EstadoEnum.CANCELADA -> MaterialTheme.colorScheme.onErrorContainer
                                 }
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -118,7 +119,7 @@ fun CitaDetailScreen(
                                 shape = MaterialTheme.shapes.small
                             ) {
                                 Text(
-                                    text = "Estado: ${cita!!.estado.uppercase()}",
+                                    text = "Estado: ${cita!!.estado.name}",
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                                 )

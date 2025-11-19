@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cl.duoc.app.data.entity.Cita
+import cl.duoc.app.data.entity.EstadoCita as EstadoEnum
 import cl.duoc.app.ui.HomeViewModel
 import kotlinx.coroutines.delay
 
@@ -40,7 +41,7 @@ fun CitasListScreen(
                 title = { Text("Citas Médicas") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, "Volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -178,22 +179,22 @@ fun CitaListCard(
                 
                 Surface(
                     color = when (cita.estado) {
-                        "pendiente" -> MaterialTheme.colorScheme.primaryContainer
-                        "confirmada" -> MaterialTheme.colorScheme.tertiaryContainer
-                        "completada" -> MaterialTheme.colorScheme.secondaryContainer
-                        else -> MaterialTheme.colorScheme.errorContainer
+                        EstadoEnum.PENDIENTE -> MaterialTheme.colorScheme.primaryContainer
+                        EstadoEnum.CONFIRMADA -> MaterialTheme.colorScheme.tertiaryContainer
+                        EstadoEnum.COMPLETADA -> MaterialTheme.colorScheme.secondaryContainer
+                        EstadoEnum.CANCELADA -> MaterialTheme.colorScheme.errorContainer
                     },
                     shape = MaterialTheme.shapes.small
                 ) {
                     Text(
-                        text = cita.estado.uppercase(),
+                        text = cita.estado.name,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                         color = when (cita.estado) {
-                            "pendiente" -> MaterialTheme.colorScheme.onPrimaryContainer
-                            "confirmada" -> MaterialTheme.colorScheme.onTertiaryContainer
-                            "completada" -> MaterialTheme.colorScheme.onSecondaryContainer
-                            else -> MaterialTheme.colorScheme.onErrorContainer
+                            EstadoEnum.PENDIENTE -> MaterialTheme.colorScheme.onPrimaryContainer
+                            EstadoEnum.CONFIRMADA -> MaterialTheme.colorScheme.onTertiaryContainer
+                            EstadoEnum.COMPLETADA -> MaterialTheme.colorScheme.onSecondaryContainer
+                            EstadoEnum.CANCELADA -> MaterialTheme.colorScheme.onErrorContainer
                         }
                     )
                 }

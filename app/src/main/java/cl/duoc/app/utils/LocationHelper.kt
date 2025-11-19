@@ -11,7 +11,9 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
-import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * Helper para gestionar ubicación GPS
@@ -56,7 +58,13 @@ class LocationHelper(private val context: Context) {
         }
         
         return try {
-            fusedLocationClient.lastLocation.await()
+            suspendCancellableCoroutine { continuation ->
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                    continuation.resume(location)
+                }.addOnFailureListener { e ->
+                    continuation.resumeWithException(e)
+                }
+            }
         } catch (e: Exception) {
             null
         }
@@ -74,10 +82,16 @@ class LocationHelper(private val context: Context) {
         
         return try {
             val cancellationTokenSource = CancellationTokenSource()
-            fusedLocationClient.getCurrentLocation(
-                Priority.PRIORITY_HIGH_ACCURACY,
-                cancellationTokenSource.token
-            ).await()
+            suspendCancellableCoroutine { continuation ->
+                fusedLocationClient.getCurrentLocation(
+                    Priority.PRIORITY_HIGH_ACCURACY,
+                    cancellationTokenSource.token
+                ).addOnSuccessListener { location ->
+                    continuation.resume(location)
+                }.addOnFailureListener { e ->
+                    continuation.resumeWithException(e)
+                }
+            }
         } catch (e: Exception) {
             // Si falla la ubicación actual, intentar con la última conocida
             getLastKnownLocation()

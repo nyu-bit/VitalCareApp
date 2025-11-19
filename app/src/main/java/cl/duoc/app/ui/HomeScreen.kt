@@ -35,9 +35,9 @@ fun HomeScreen(
     val citas by viewModel.citas.collectAsState(initial = emptyList())
     val isLoading by viewModel.isLoading.collectAsState()
     val message by viewModel.message.collectAsState()
-    
+
     var isContentVisible by remember { mutableStateOf(false) }
-    
+
     LaunchedEffect(Unit) {
         delay(100)
         isContentVisible = true
@@ -95,133 +95,132 @@ fun HomeScreen(
                                 modifier = Modifier.size(100.dp),
                                 contentScale = ContentScale.Fit
                             )
-                            
+
                             Spacer(modifier = Modifier.height(8.dp))
-                            
+
                             Text(
                                 text = "Bienvenido a VitalCare",
                                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            
-                            Text(
-                            text = "Sistema de reserva de horas médicas",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                }
 
-                // Contador de acciones
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
                             Text(
-                                text = "Contador de acciones",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                text = "Sistema de reserva de horas médicas",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onBackground
                             )
+                        }
+                    }
+
+                    // Contador de acciones
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "Contador de acciones",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                                Text(
+                                    text = "$counter",
+                                    style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+
+                    // Botones de navegación rápida
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button(
+                                onClick = onNavigateToPacientes,
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp)
+                            ) { Text("Pacientes") }
+
+                            Button(
+                                onClick = onNavigateToCitas,
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp)
+                            ) { Text("Citas") }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        OutlinedButton(
+                            onClick = onNavigateToEspecialidades,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        ) { Text("Ver Especialidades") }
+                    }
+
+                    // Estadísticas de la base de datos
+                    item {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        } else {
+                            DatabaseStatsCard(
+                                pacientesCount = pacientes.size,
+                                especialidadesCount = especialidades.size,
+                                citasCount = citas.size
+                            )
+                        }
+                    }
+
+                    // Lista de especialidades
+                    if (especialidades.isNotEmpty()) {
+                        item {
                             Text(
-                                text = "$counter",
-                                style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold),
+                                text = "Especialidades Disponibles",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        items(especialidades) { especialidad ->
+                            EspecialidadCard(
+                                nombre = especialidad.nombre,
+                                descripcion = especialidad.descripcion,
+                                duracion = especialidad.duracionConsulta
+                            )
+                        }
+                    }
+
+                    // Lista de pacientes
+                    if (pacientes.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "Pacientes Registrados",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+
+                        items(pacientes) { paciente ->
+                            PacienteCard(
+                                nombre = "${paciente.nombre} ${paciente.apellido}",
+                                rut = paciente.rut,
+                                email = paciente.email,
+                                onClick = { onPacienteClick(paciente.id) }
                             )
                         }
                     }
                 }
-
-                // Botones de navegación rápida
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Button(
-                            onClick = onNavigateToPacientes,
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp)
-                        ) { Text("Pacientes") }
-
-                        Button(
-                            onClick = onNavigateToCitas,
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp)
-                        ) { Text("Citas") }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    OutlinedButton(
-                        onClick = onNavigateToEspecialidades,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
-                    ) { Text("Ver Especialidades") }
-                }
-
-                // Estadísticas de la base de datos
-                item {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    } else {
-                        DatabaseStatsCard(
-                            pacientesCount = pacientes.size,
-                            especialidadesCount = especialidades.size,
-                            citasCount = citas.size
-                        )
-                    }
-                }
-
-                // Lista de especialidades
-                if (especialidades.isNotEmpty()) {
-                    item {
-                        Text(
-                            text = "Especialidades Disponibles",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-
-                    items(especialidades) { especialidad ->
-                        EspecialidadCard(
-                            nombre = especialidad.nombre,
-                            descripcion = especialidad.descripcion,
-                            duracion = especialidad.duracionConsulta
-                        )
-                    }
-                }
-
-                // Lista de pacientes
-                if (pacientes.isNotEmpty()) {
-                    item {
-                        Text(
-                            text = "Pacientes Registrados",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-
-                    items(pacientes) { paciente ->
-                        PacienteCard(
-                            nombre = "${paciente.nombre} ${paciente.apellido}",
-                            rut = paciente.rut,
-                            email = paciente.email,
-                            onClick = { onPacienteClick(paciente.id) }
-                        )
-                    }
-                }
-            }
-        }
             }
         }
     }
@@ -247,9 +246,9 @@ fun DatabaseStatsCard(
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSecondaryContainer
             )
-            
+
             Spacer(modifier = Modifier.height(12.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -346,3 +345,4 @@ fun HomeScreenPreview() {
         HomeScreen()
     }
 }
+
