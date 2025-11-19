@@ -1,147 +1,144 @@
 package cl.duoc.app.ui
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import cl.duoc.app.utils.FormatUtils
-import kotlinx.coroutines.delay
+import cl.duoc.app.data.database.VitalCareDatabase
+import cl.duoc.app.data.entity.Cita
+import cl.duoc.app.data.entity.Especialidad
+import cl.duoc.app.data.entity.EstadoCita
+import cl.duoc.app.data.entity.Paciente
+import cl.duoc.app.data.repository.CitaRepository
+import cl.duoc.app.data.repository.EspecialidadRepository
+import cl.duoc.app.data.repository.PacienteRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * Estado de la pantalla Home
- * Representa toda la información que se muestra en la UI
- */
-data class HomeUiState(
-    val counter: Int = 0,
-    val userName: String = "",
-    val isLoading: Boolean = false,
-    val welcomeMessage: String = "Bienvenido a VitalCare",
-    val lastUpdate: String = "",
-    val hasError: Boolean = false,
-    val errorMessage: String? = null
-)
-
-/**
- * ViewModel para la pantalla Home
- * Gestiona el estado y la lógica de negocio de la pantalla principal
- * Expone los datos a la UI mediante StateFlow
- */
-class HomeViewModel : ViewModel() {
+class HomeViewModel(application: Application) : AndroidViewModel(application) {
     
-    // Estado privado mutable
-    private val _uiState = MutableStateFlow(HomeUiState())
+    // Base de datos y repositorios
+    private val database = VitalCareDatabase.getDatabase(application)
+    private val pacienteRepository = PacienteRepository(database.pacienteDao())
+    private val especialidadRepository = EspecialidadRepository(database.especialidadDao())
+    private val citaRepository = CitaRepository(database.citaDao())
     
-    // Estado público inmutable expuesto a la UI
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
-
+    // Contador de ejemplo
+    private val _counter = MutableStateFlow(0)
+    val counter = _counter.asStateFlow()
+    
+    // Flows observables desde la base de datos
+    val pacientes = pacienteRepository.pacientesActivos
+    val especialidades = especialidadRepository.especialidadesActivas
+    val citas = citaRepository.todasCitas
+    
+    // Estado de carga
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+    
+    // Mensaje de feedback
+    private val _message = MutableStateFlow<String?>(null)
+    val message = _message.asStateFlow()
+    
     init {
-        loadUserData()
+        // Inicializar con datos de ejemplo si la base de datos está vacía
+        initializeSampleData()
     }
-
-    /**
-     * Incrementa el contador
-     */
-    fun incrementCounter() {
-        _uiState.update { currentState ->
-            currentState.copy(
-                counter = currentState.counter + 1,
-                lastUpdate = getCurrentTime()
-            )
-        }
+    
+    fun inc() { 
+        _counter.value++ 
     }
-
-    /**
-     * Decrementa el contador
-     */
-    fun decrementCounter() {
-        _uiState.update { currentState ->
-            currentState.copy(
-                counter = maxOf(0, currentState.counter - 1),
-                lastUpdate = getCurrentTime()
-            )
-        }
+    
+    fun reset() { 
+        _counter.value = 0 
     }
-
+    
     /**
-     * Resetea el contador
+     * Inicializa la base de datos con datos de ejemplo
      */
-    fun resetCounter() {
-        _uiState.update { currentState ->
-            currentState.copy(
-                counter = 0,
-                lastUpdate = getCurrentTime()
-            )
-        }
-    }
-
-    /**
-     * Carga los datos del usuario
-     * Simula una operación asíncrona
-     */
-    fun loadUserData() {
+    private fun initializeSampleData() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, hasError = false) }
-            
+            _isLoading.value = true
             try {
-                // Simular carga desde repositorio
-                delay(1500)
+                // Insertar especialidades de ejemplo
+                val especialidades = listOf(
+                    Especialidad(
+                        nombre = "Psicología",
+                        descripcion = "Atención psicológica general",
+                        duracionConsulta = 45
+                    ),
+                    Especialidad(
+                        nombre = "Psiquiatría",
+                        descripcion = "Evaluación y tratamiento psiquiátrico",
+                        duracionConsulta = 30
+                    ),
+                    Especialidad(
+                        nombre = "Terapia Familiar",
+                        descripcion = "Terapia para familias y parejas",
+                        duracionConsulta = 60
+                    )
+                )
+                especialidadRepository.insertAll(especialidades)
                 
-                // Simulación de datos cargados
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        userName = "Angel Developer",
-                        welcomeMessage = "¡Bienvenido de nuevo, Angel!",
-                        isLoading = false,
-                        lastUpdate = getCurrentTime()
+                // Insertar pacientes de ejemplo
+                val pacientes = listOf(
+                    Paciente(
+                        rut = "12345678-9",
+                        nombre = "Juan",
+                        apellido = "Pérez",
+                        email = "juan.perez@email.com",
+                        telefono = "+56912345678",
+                        fechaNacimiento = "1990-05-15",
+                        direccion = "Av. Principal 123, Santiago"
+                    ),
+                    Paciente(
+                        rut = "98765432-1",
+                        nombre = "María",
+                        apellido = "González",
+                        email = "maria.gonzalez@email.com",
+                        telefono = "+56987654321",
+                        fechaNacimiento = "1985-08-20",
+                        direccion = "Calle Secundaria 456, Valparaíso"
                     )
-                }
+                )
+                pacienteRepository.insertAll(pacientes)
+                
+                // Insertar citas de ejemplo
+                val citas = listOf(
+                    Cita(
+                        pacienteId = 1,
+                        especialidadId = 1,
+                        fecha = "2025-11-25",
+                        hora = "10:00",
+                        estado = EstadoCita.PENDIENTE,
+                        motivo = "Evaluación inicial",
+                        observaciones = "Primera consulta"
+                    ),
+                    Cita(
+                        pacienteId = 2,
+                        especialidadId = 2,
+                        fecha = "2025-11-26",
+                        hora = "14:30",
+                        estado = EstadoCita.CONFIRMADA,
+                        motivo = "Control mensual",
+                        observaciones = "Paciente regular"
+                    )
+                )
+                citaRepository.insertAll(citas)
+                
+                _message.value = "✅ Base de datos inicializada con datos de ejemplo"
             } catch (e: Exception) {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        isLoading = false,
-                        hasError = true,
-                        errorMessage = "Error al cargar datos: ${e.message}"
-                    )
-                }
+                _message.value = "❌ Error al inicializar: ${e.message}"
+            } finally {
+                _isLoading.value = false
             }
         }
     }
-
+    
     /**
-     * Actualiza el nombre del usuario
+     * Limpia el mensaje de feedback
      */
-    fun updateUserName(newName: String) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                userName = newName,
-                welcomeMessage = "¡Bienvenido, $newName!",
-                lastUpdate = getCurrentTime()
-            )
-        }
-    }
-
-    /**
-     * Limpia el error
-     */
-    fun clearError() {
-        _uiState.update { it.copy(hasError = false, errorMessage = null) }
-    }
-
-    /**
-     * Obtiene la hora actual formateada
-     */
-    private fun getCurrentTime(): String {
-        return FormatUtils.formatTime(System.currentTimeMillis())
-    }
-
-    /**
-     * Se llama cuando el ViewModel es destruido
-     */
-    override fun onCleared() {
-        super.onCleared()
-        // Aquí se pueden limpiar recursos si es necesario
+    fun clearMessage() {
+        _message.value = null
     }
 }
