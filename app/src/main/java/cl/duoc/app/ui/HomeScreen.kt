@@ -21,8 +21,10 @@ import cl.duoc.app.R
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = viewModel(),
-    onPrimaryAction: () -> Unit,
-    onSecondaryAction: () -> Unit
+    onNavigateToPacientes: () -> Unit = {},
+    onNavigateToCitas: () -> Unit = {},
+    onNavigateToEspecialidades: () -> Unit = {},
+    onPacienteClick: (Long) -> Unit = {}
 ) {
     val counter by viewModel.counter.collectAsState()
     val pacientes by viewModel.pacientes.collectAsState(initial = emptyList())
@@ -119,24 +121,32 @@ fun HomeScreen(
                     }
                 }
 
-                // Botones de acción
+                // Botones de navegación rápida
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Button(
-                            onClick = onPrimaryAction,
+                            onClick = onNavigateToPacientes,
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp)
-                        ) { Text("Incrementar") }
+                        ) { Text("Pacientes") }
 
-                        OutlinedButton(
-                            onClick = onSecondaryAction,
+                        Button(
+                            onClick = onNavigateToCitas,
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp)
-                        ) { Text("Reiniciar") }
+                        ) { Text("Citas") }
                     }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    OutlinedButton(
+                        onClick = onNavigateToEspecialidades,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) { Text("Ver Especialidades") }
                 }
 
                 // Estadísticas de la base de datos
@@ -188,7 +198,8 @@ fun HomeScreen(
                         PacienteCard(
                             nombre = "${paciente.nombre} ${paciente.apellido}",
                             rut = paciente.rut,
-                            email = paciente.email
+                            email = paciente.email,
+                            onClick = { onPacienteClick(paciente.id) }
                         )
                     }
                 }
@@ -279,12 +290,13 @@ fun EspecialidadCard(nombre: String, descripcion: String, duracion: Int) {
 }
 
 @Composable
-fun PacienteCard(nombre: String, rut: String, email: String) {
+fun PacienteCard(nombre: String, rut: String, email: String, onClick: () -> Unit = {}) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        ),
+        onClick = onClick
     ) {
         Column(
             modifier = Modifier.padding(12.dp)
@@ -312,9 +324,6 @@ fun PacienteCard(nombre: String, rut: String, email: String) {
 @Composable
 fun HomeScreenPreview() {
     MaterialTheme {
-        HomeScreen(
-            onPrimaryAction = { },
-            onSecondaryAction = { }
-        )
+        HomeScreen()
     }
 }

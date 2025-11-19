@@ -5,7 +5,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import cl.duoc.app.ui.HomeScreen
+import androidx.navigation.compose.rememberNavController
+import cl.duoc.app.navigation.VitalCareNavHost
 import cl.duoc.app.ui.HomeViewModel
 
 class MainActivity : AppCompatActivity() {
@@ -16,10 +17,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            HomeScreen(
-                viewModel = viewModel,
-                onPrimaryAction = { viewModel.inc() },
-                onSecondaryAction = { viewModel.reset() }
+            val navController = rememberNavController()
+            VitalCareNavHost(
+                navController = navController,
+                viewModel = viewModel
             )
         }
     }
