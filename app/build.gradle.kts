@@ -1,7 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.jetbrains.compose)
+    alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -102,3 +103,39 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 }
 
+<<<<<<< HEAD
+=======
+    // Jetpack Compose - versiones actualizadas
+    implementation("androidx.activity:activity-compose:1.9.0")
+    implementation("androidx.compose.ui:ui:1.6.8")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.6.8")
+    implementation("androidx.compose.material3:material3:1.2.1")
+
+    // Para desarrollo y debugging
+    debugImplementation("androidx.compose.ui:ui-tooling:1.6.8")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.8")
+
+    // Material Icons
+    implementation("androidx.compose.material:material-icons-extended:1.6.8")
+
+    // Integration con ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.0")
+
+    // Navigation con Compose
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+
+    // Room - SQLite Database
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
+
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+    
+    // Google Play Services - Location
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+}
+>>>>>>> MajoApp
