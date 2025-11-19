@@ -11,8 +11,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import cl.duoc.app.ui.HomeScreen
 import cl.duoc.app.ui.HomeViewModel
+import cl.duoc.app.ui.pacientes.PacienteDetailScreen
 import cl.duoc.app.ui.pacientes.PacienteFormScreen
 import cl.duoc.app.ui.pacientes.PacientesListScreen
+import cl.duoc.app.ui.citas.CitaDetailScreen
+import cl.duoc.app.ui.citas.CitaFormScreen
+import cl.duoc.app.ui.citas.CitasListScreen
+import cl.duoc.app.ui.especialidades.EspecialidadesListScreen
 
 /**
  * NavHost principal de la aplicación
@@ -132,50 +137,4 @@ fun VitalCareNavHost(
             )
         }
     }
-}
-
-// Placeholders temporales - se implementarán en el siguiente paso
-@Composable
-private fun PacienteDetailScreen(
-    pacienteId: Long,
-    viewModel: HomeViewModel,
-    onNavigateBack: () -> Unit
-) {
-    // TODO: Implementar
-}
-
-@Composable
-private fun CitasListScreen(
-    viewModel: HomeViewModel,
-    onNavigateBack: () -> Unit,
-    onCitaClick: (Long) -> Unit,
-    onAddCita: () -> Unit
-) {
-    // TODO: Implementar
-}
-
-@Composable
-private fun CitaFormScreen(
-    viewModel: HomeViewModel,
-    onNavigateBack: () -> Unit,
-    onSaveSuccess: () -> Unit
-) {
-    // TODO: Implementar
-}
-
-@Composable
-private fun CitaDetailScreen(
-    citaId: Long,
-    viewModel: HomeViewModel,
-    onNavigateBack: () -> Unit
-) {
-    // TODO: Implementar
-}
-
-@Composable
-private fun EspecialidadesListScreen(
-    viewModel: HomeViewModel,
-    onNavigateBack: () -> Unit
-) {
-    // TODO: Implementar
 }
