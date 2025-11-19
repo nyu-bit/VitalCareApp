@@ -42,19 +42,7 @@ data class Cita(
     val especialidadId: Long,
     val fecha: String, // formato: "yyyy-MM-dd"
     val hora: String, // formato: "HH:mm"
-    val estado: EstadoCita = EstadoCita.PENDIENTE,
-    val motivo: String,
-    val observaciones: String? = null,
-    val ubicacion: String? = null // para guardar coordenadas GPS
+    val estado: String = "pendiente", // pendiente, confirmada, completada, cancelada
+    val observaciones: String = "",
+    val ubicacion: String? = null // coordenadas GPS formato: "lat,lon"
 )
-
-/**
- * Estados posibles de una cita médica
- */
-enum class EstadoCita {
-    PENDIENTE,
-    CONFIRMADA,
-    COMPLETADA,
-    CANCELADA,
-    REAGENDADA
-}
