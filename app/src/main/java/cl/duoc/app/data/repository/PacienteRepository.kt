@@ -10,9 +10,9 @@ import kotlinx.coroutines.flow.Flow
  */
 class PacienteRepository(private val pacienteDao: PacienteDao) {
     
-    val todosPacientes: Flow<List<Paciente>> = pacienteDao.getAllPacientes()
-    val pacientesActivos: Flow<List<Paciente>> = pacienteDao.getPacientesActivos()
-    
+    val todosPacientes: Flow<List<Paciente>> by lazy { pacienteDao.getAllPacientes() }
+    val pacientesActivos: Flow<List<Paciente>> by lazy { pacienteDao.getPacientesActivos() }
+
     fun getPacienteById(id: Long): Flow<Paciente?> {
         return pacienteDao.getPacienteByIdFlow(id)
     }

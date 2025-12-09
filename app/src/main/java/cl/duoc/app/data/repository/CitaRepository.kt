@@ -8,11 +8,16 @@ import kotlinx.coroutines.flow.Flow
 /**
  * Repository para Citas
  * Abstrae el acceso a datos y centraliza la lógica de negocio
+ *
+ * Proporciona métodos para CRUD de citas y operaciones especializadas
+ * como filtrar por estado, fecha, paciente, etc.
  */
 class CitaRepository(private val citaDao: CitaDao) {
-    
-    val todasCitas: Flow<List<Cita>> = citaDao.getAllCitas()
-    
+
+    val todasCitas: Flow<List<Cita>> by lazy {
+        citaDao.getAllCitas()
+    }
+
     fun getCitaById(id: Long): Flow<Cita?> {
         return citaDao.getCitaByIdFlow(id)
     }
@@ -73,14 +78,14 @@ class CitaRepository(private val citaDao: CitaDao) {
     }
     
     suspend fun confirmarCita(citaId: Long) {
-        citaDao.updateEstado(citaId, EstadoCita.CONFIRMADA)
+        updateEstado(citaId, EstadoCita.CONFIRMADA)
     }
     
     suspend fun cancelarCita(citaId: Long) {
-        citaDao.updateEstado(citaId, EstadoCita.CANCELADA)
+        updateEstado(citaId, EstadoCita.CANCELADA)
     }
     
     suspend fun completarCita(citaId: Long) {
-        citaDao.updateEstado(citaId, EstadoCita.COMPLETADA)
+        updateEstado(citaId, EstadoCita.COMPLETADA)
     }
 }

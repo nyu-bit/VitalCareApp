@@ -10,9 +10,9 @@ import kotlinx.coroutines.flow.Flow
  */
 class EspecialidadRepository(private val especialidadDao: EspecialidadDao) {
     
-    val todasEspecialidades: Flow<List<Especialidad>> = especialidadDao.getAllEspecialidades()
-    val especialidadesActivas: Flow<List<Especialidad>> = especialidadDao.getEspecialidadesActivas()
-    
+    val todasEspecialidades: Flow<List<Especialidad>> by lazy { especialidadDao.getAllEspecialidades() }
+    val especialidadesActivas: Flow<List<Especialidad>> by lazy { especialidadDao.getEspecialidadesActivas() }
+
     fun getEspecialidadById(id: Long): Flow<Especialidad?> {
         return especialidadDao.getEspecialidadByIdFlow(id)
     }
