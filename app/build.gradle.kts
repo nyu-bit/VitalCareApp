@@ -20,6 +20,15 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("${System.getProperty("user.home")}/.android/vitalcare_release.keystore")
+            storePassword = "VitalCare@2025"
+            keyAlias = "vitalcare_key"
+            keyPassword = "VitalCare@2025"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -27,6 +36,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
