@@ -2,6 +2,8 @@ package cl.duoc.app.ui.alerts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cl.duoc.app.data.api.AlertaDto
+import cl.duoc.app.data.repository.AlertasRepository
 import cl.duoc.app.model.Alert
 import cl.duoc.app.utils.ErrorHandler
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,10 +18,13 @@ import kotlinx.coroutines.launch
  * Responsabilidades:
  * - Gestionar lista de alertas
  * - Filtrar por tipo y severidad
- * - Marcar alertas como leídas
+ * - Marcar alertas como leídas/atendidas
+ * - Crear, actualizar y eliminar alertas
  * - Proporcionar estadísticas de alertas
  */
 class AlertsViewModel : ViewModel() {
+
+    private val alertasRepository = AlertasRepository()
 
     private val _uiState = MutableStateFlow(AlertsUiState())
     val uiState: StateFlow<AlertsUiState> = _uiState.asStateFlow()
@@ -29,22 +34,45 @@ class AlertsViewModel : ViewModel() {
     }
 
     /**
-     * Carga las alertas del usuario
+     * Carga las alertas del usuario desde la API remota
      */
-    fun loadAlerts(userId: String = "user123") {
+    fun loadAlerts(pacienteId: String = "user123") {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             try {
-                // TODO: Implementar con repositorio real
-                val mockAlerts = generateMockAlerts(userId)
+                val result = alertasRepository.getByPaciente(pacienteId)
 
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        allAlerts = mockAlerts,
-                        error = null
+                result.onSuccess { alertaDtos ->
+                    val alerts = alertaDtos.map { dto ->
+                        Alert(
+                            id = dto.id ?: "",
+                            userId = dto.pacienteId,
+                            title = dto.titulo,
+                            message = dto.mensaje,
+                            severity = dto.severidad,
+                            type = dto.tipo,
+                            isRead = dto.leida,
+                            timestamp = dto.timestamp,
+                            relatedId = dto.idRelacionado
+                        )
+                    }
+
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            allAlerts = alerts,
+                            error = null
+                        )
+                    }
+                }.onFailure { exception ->
+                    val errorMessage = ErrorHandler.handleException(
+                        exception = exception,
+                        tag = "AlertsViewModel"
                     )
+                    _uiState.update {
+                        it.copy(isLoading = false, error = errorMessage)
+                    }
                 }
             } catch (e: Exception) {
                 val errorMessage = ErrorHandler.handleException(
@@ -59,14 +87,126 @@ class AlertsViewModel : ViewModel() {
     }
 
     /**
-     * Marca una alerta como leída
+     * Crea una nueva alerta
      */
-    fun markAsRead(alertId: String) {
-        _uiState.update { currentState ->
-            val updatedAlerts = currentState.allAlerts.map { alert ->
-                if (alert.id == alertId) alert.copy(isRead = true) else alert
+    fun createAlerta(
+        pacienteId: String,
+        titulo: String,
+        mensaje: String,
+        severidad: String,
+        tipo: String,
+        idRelacionado: String? = null
+    ) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+
+            try {
+                val alertaDto = AlertaDto(
+                    pacienteId = pacienteId,
+                    titulo = titulo,
+                    mensaje = mensaje,
+                    severidad = severidad,
+                    tipo = tipo,
+                    leida = false,
+                    timestamp = System.currentTimeMillis(),
+                    idRelacionado = idRelacionado
+                )
+
+                val result = alertasRepository.createAlerta(alertaDto)
+
+                result.onSuccess { createdDto ->
+                    val newAlert = Alert(
+                        id = createdDto.id ?: "",
+                        userId = createdDto.pacienteId,
+                        title = createdDto.titulo,
+                        message = createdDto.mensaje,
+                        severity = createdDto.severidad,
+                        type = createdDto.tipo,
+                        isRead = createdDto.leida,
+                        timestamp = createdDto.timestamp,
+                        relatedId = createdDto.idRelacionado
+                    )
+
+                    _uiState.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            allAlerts = state.allAlerts + newAlert,
+                            error = null
+                        )
+                    }
+                }.onFailure { exception ->
+                    val errorMessage = ErrorHandler.handleException(
+                        exception = exception,
+                        tag = "AlertsViewModel.createAlerta"
+                    )
+                    _uiState.update {
+                        it.copy(isLoading = false, error = errorMessage)
+                    }
+                }
+            } catch (e: Throwable) {
+                val errorMessage = ErrorHandler.handleException(
+                    exception = e,
+                    tag = "AlertsViewModel.createAlerta"
+                )
+                _uiState.update {
+                    it.copy(isLoading = false, error = errorMessage)
+                }
             }
-            currentState.copy(allAlerts = updatedAlerts)
+        }
+    }
+
+    /**
+     * Marca una alerta como atendida (actualiza en la API)
+     */
+    fun markAsAttended(alertId: String) {
+        viewModelScope.launch {
+            try {
+                // Encontrar la alerta actual
+                val alertToUpdate = _uiState.value.allAlerts.find { it.id == alertId }
+                if (alertToUpdate != null) {
+                    // Crear DTO con leida = true
+                    val alertaDto = AlertaDto(
+                        id = alertId,
+                        pacienteId = alertToUpdate.userId,
+                        titulo = alertToUpdate.title,
+                        mensaje = alertToUpdate.message,
+                        severidad = alertToUpdate.severity,
+                        tipo = alertToUpdate.type,
+                        leida = true,
+                        timestamp = alertToUpdate.timestamp,
+                        idRelacionado = alertToUpdate.relatedId
+                    )
+
+                    // Actualizar en la API
+                    val result = alertasRepository.markAsAttended(alertaDto)
+
+                    result.onSuccess {
+                        // Actualizar estado local
+                        _uiState.update { state ->
+                            val updated = state.allAlerts.map { alert ->
+                                if (alert.id == alertId) alert.copy(isRead = true) else alert
+                            }
+                            state.copy(allAlerts = updated, error = null)
+                        }
+                    }.onFailure { exception ->
+                        val errorMessage = ErrorHandler.handleException(
+                            exception = exception,
+                            tag = "AlertsViewModel.markAsAttended"
+                        )
+                        _uiState.update {
+                            it.copy(error = errorMessage)
+                        }
+                    }
+                }
+            } catch (e: Throwable) {
+                val errorMessage = ErrorHandler.handleException(
+                    exception = e,
+                    tag = "AlertsViewModel.markAsAttended"
+                )
+                _uiState.update {
+                    it.copy(error = errorMessage)
+                }
+            }
         }
     }
 
@@ -83,10 +223,34 @@ class AlertsViewModel : ViewModel() {
     /**
      * Elimina una alerta
      */
-    fun deleteAlert(alertId: String) {
-        _uiState.update { currentState ->
-            val updatedAlerts = currentState.allAlerts.filter { it.id != alertId }
-            currentState.copy(allAlerts = updatedAlerts)
+    fun deleteAlerta(alertId: String) {
+        viewModelScope.launch {
+            try {
+                val result = alertasRepository.deleteAlerta(alertId)
+
+                result.onSuccess {
+                    _uiState.update { state ->
+                        val updated = state.allAlerts.filter { it.id != alertId }
+                        state.copy(allAlerts = updated, error = null)
+                    }
+                }.onFailure { exception ->
+                    val errorMessage = ErrorHandler.handleException(
+                        exception = exception,
+                        tag = "AlertsViewModel.deleteAlerta"
+                    )
+                    _uiState.update {
+                        it.copy(error = errorMessage)
+                    }
+                }
+            } catch (e: Throwable) {
+                val errorMessage = ErrorHandler.handleException(
+                    exception = e,
+                    tag = "AlertsViewModel.deleteAlerta"
+                )
+                _uiState.update {
+                    it.copy(error = errorMessage)
+                }
+            }
         }
     }
 
@@ -127,78 +291,15 @@ class AlertsViewModel : ViewModel() {
     /**
      * Refresca las alertas
      */
-    fun refresh(userId: String = "user123") {
-        loadAlerts(userId)
+    fun refresh(pacienteId: String = "user123") {
+        loadAlerts(pacienteId)
     }
 
-    // Generador de datos mock (temporal)
-    private fun generateMockAlerts(userId: String): List<Alert> {
-        val now = System.currentTimeMillis()
-        return listOf(
-            Alert(
-                id = "1",
-                userId = userId,
-                title = "Presión Arterial Elevada",
-                message = "Tu presión arterial registró 145/95 mmHg. Se recomienda consultar con tu médico.",
-                severity = "Alto",
-                type = "Signos Vitales",
-                isRead = false,
-                timestamp = now - 3600000,
-                relatedId = "vital_001"
-            ),
-            Alert(
-                id = "2",
-                userId = userId,
-                title = "Frecuencia Cardíaca Baja",
-                message = "Se detectó una frecuencia cardíaca de 52 bpm. Considera hacer seguimiento.",
-                severity = "Medio",
-                type = "Signos Vitales",
-                isRead = false,
-                timestamp = now - 7200000,
-                relatedId = "vital_002"
-            ),
-            Alert(
-                id = "3",
-                userId = userId,
-                title = "Cita Médica Próxima",
-                message = "Recuerda tu cita con el Dr. González mañana a las 10:00 AM.",
-                severity = "Bajo",
-                type = "Cita",
-                isRead = true,
-                timestamp = now - 86400000
-            ),
-            Alert(
-                id = "4",
-                userId = userId,
-                title = "Oxigenación Crítica",
-                message = "Saturación de oxígeno de 88%. ¡Busca atención médica inmediata!",
-                severity = "Crítico",
-                type = "Signos Vitales",
-                isRead = false,
-                timestamp = now - 1800000,
-                relatedId = "vital_003"
-            ),
-            Alert(
-                id = "5",
-                userId = userId,
-                title = "Recordatorio de Medicamento",
-                message = "Es hora de tomar tu medicamento para la presión arterial.",
-                severity = "Medio",
-                type = "Medicamento",
-                isRead = true,
-                timestamp = now - 10800000
-            ),
-            Alert(
-                id = "6",
-                userId = userId,
-                title = "Actualización del Sistema",
-                message = "Nueva versión disponible con mejoras de seguridad.",
-                severity = "Bajo",
-                type = "Sistema",
-                isRead = true,
-                timestamp = now - 172800000
-            )
-        )
+    /**
+     * Limpia el mensaje de error
+     */
+    fun clearError() {
+        _uiState.update { it.copy(error = null) }
     }
 }
 

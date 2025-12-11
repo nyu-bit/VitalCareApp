@@ -92,11 +92,11 @@ object ErrorHandler {
      * Maneja una excepción de forma segura, registrando y retornando mensaje apropiado
      */
     fun handleException(
-        exception: Exception,
+        exception: Throwable,
         tag: String = TAG,
         customMessage: String? = null
     ): String {
-        val errorType = classifyException(exception)
+        val errorType = if (exception is Exception) classifyException(exception) else ErrorType.UNKNOWN
         logError(tag, customMessage ?: exception.message ?: "Unknown error", exception)
         return customMessage ?: getUserFriendlyMessage(errorType)
     }
