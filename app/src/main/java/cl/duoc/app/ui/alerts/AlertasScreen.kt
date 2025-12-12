@@ -378,10 +378,9 @@ private fun AlertCard(
         colors = CardDefaults.cardColors(
             containerColor = backgroundColor
         ),
-        border = androidx.compose.foundation.border(
+        border = androidx.compose.foundation.BorderStroke(
             width = 2.dp,
-            color = borderColor,
-            shape = RoundedCornerShape(12.dp)
+            color = borderColor
         )
     ) {
         Column(

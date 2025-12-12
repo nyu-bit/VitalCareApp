@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.app.data.api.SignosVitalesDto
@@ -170,7 +172,7 @@ private fun VitalCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = formatDate(vital.fecha),
+                    text = formatDate(vital.timestamp),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline
                 )
@@ -200,19 +202,19 @@ private fun VitalCard(
                     VitalMetric(
                         icon = Icons.Default.Favorite,
                         label = "Frecuencia",
-                        value = "${vital.frecuenciaCardiaca}",
+                        value = "${vital.frecuenciaCardiaca ?: 0}",
                         unit = "bpm",
                         modifier = Modifier.weight(1f),
-                        riskLevel = getRiskLevel(vital.frecuenciaCardiaca, 60, 100)
+                        riskLevel = getRiskLevel(vital.frecuenciaCardiaca ?: 0, 60, 100)
                     )
 
                     VitalMetric(
                         icon = Icons.Default.Thermostat,
                         label = "Temperatura",
-                        value = "%.1f".format(vital.temperatura),
+                        value = "%.1f".format(vital.temperatura ?: 0.0),
                         unit = "°C",
                         modifier = Modifier.weight(1f),
-                        riskLevel = getRiskLevel(vital.temperatura.toInt(), 36, 37)
+                        riskLevel = getRiskLevel((vital.temperatura ?: 0.0).toInt(), 36, 37)
                     )
                 }
 
@@ -224,7 +226,7 @@ private fun VitalCard(
                     VitalMetric(
                         icon = Icons.Default.LocalFireDepartment,
                         label = "Presión",
-                        value = vital.presionArterial,
+                        value = "${vital.presionArterialSistolica ?: 0}/${vital.presionArterialDiastolica ?: 0}",
                         unit = "mmHg",
                         modifier = Modifier.weight(1f),
                         riskLevel = "normal"
@@ -233,10 +235,10 @@ private fun VitalCard(
                     VitalMetric(
                         icon = Icons.Default.Air,
                         label = "O₂",
-                        value = "${vital.saturacionOxigeno}",
+                        value = "${vital.saturacionOxigeno ?: 0}",
                         unit = "%",
                         modifier = Modifier.weight(1f),
-                        riskLevel = getRiskLevel(vital.saturacionOxigeno, 95, 100)
+                        riskLevel = getRiskLevel(vital.saturacionOxigeno ?: 0, 95, 100)
                     )
                 }
             }
@@ -261,7 +263,7 @@ private fun VitalCard(
  */
 @Composable
 private fun VitalMetric(
-    icon: androidx.compose.material.icons.materialIcon,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
     value: String,
     unit: String,
@@ -312,7 +314,7 @@ private fun VitalMetric(
 
             Row(
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.Baseline
+                verticalAlignment = Alignment.Bottom
             ) {
                 Text(
                     text = value,
@@ -455,6 +457,15 @@ private fun EmptyState(
 /**
  * Funciones auxiliares
  */
+private fun formatDate(timestamp: Long): String {
+    return try {
+        val outputFormat = SimpleDateFormat("dd MMM yyyy HH:mm", Locale("es", "ES"))
+        outputFormat.format(Date(timestamp))
+    } catch (e: Exception) {
+        timestamp.toString()
+    }
+}
+
 private fun formatDate(dateString: String): String {
     return try {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())

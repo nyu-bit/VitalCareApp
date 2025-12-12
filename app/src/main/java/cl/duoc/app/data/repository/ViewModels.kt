@@ -123,7 +123,7 @@ class VitalesViewModel : ViewModel() {
         }
 
         viewModelScope.launch {
-            val result = repository.deleteVitales(vitalesId)
+            val result = repository.deleteVital(vitalesId)
 
             result.fold(
                 onSuccess = {
@@ -231,7 +231,7 @@ class UbicacionViewModel : ViewModel() {
             _loading.value = true
             _error.value = null
 
-            val result = repository.saveUbicacion(ubicacion)
+            val result = repository.save(ubicacion)
 
             result.fold(
                 onSuccess = { guardada ->
@@ -340,7 +340,7 @@ class AlertasViewModel : ViewModel() {
             _loading.value = true
             _error.value = null
 
-            val result = repository.createAlerta(alerta)
+            val result = repository.create(alerta)
 
             result.fold(
                 onSuccess = { creada ->
@@ -369,7 +369,7 @@ class AlertasViewModel : ViewModel() {
             _loading.value = true
             _error.value = null
 
-            val result = repository.markAsAttended(alerta)
+            val result = repository.markAsAttended(alerta.id!!, alerta)
 
             result.fold(
                 onSuccess = { actualizada ->
@@ -397,7 +397,7 @@ class AlertasViewModel : ViewModel() {
         }
 
         viewModelScope.launch {
-            val result = repository.deleteAlerta(alertaId)
+            val result = repository.delete(alertaId)
 
             result.fold(
                 onSuccess = {

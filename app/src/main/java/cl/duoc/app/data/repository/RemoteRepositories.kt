@@ -85,7 +85,7 @@ class VitalesRepository {
         withContext(Dispatchers.IO) {
             try {
                 Log.d(TAG, "Llamando: POST /vitales")
-                val resultado = vitalesApi.createVital(signoVital)
+                val resultado = vitalesApi.createVitales(signoVital)
                 Log.d(TAG, "Éxito: Vital creado con ID ${resultado.id}")
                 Result.success(resultado)
             } catch (e: IOException) {
@@ -114,7 +114,7 @@ class VitalesRepository {
                     return@withContext Result.failure(Exception("ID inválido"))
                 }
                 Log.d(TAG, "Llamando: DELETE /vitales/$id")
-                vitalesApi.deleteVital(id)
+                vitalesApi.deleteVitales(id)
                 Log.d(TAG, "Éxito: Vital eliminado")
                 Result.success(Unit)
             } catch (e: IOException) {
@@ -168,7 +168,7 @@ class UbicacionRepository {
         withContext(Dispatchers.IO) {
             try {
                 Log.d(TAG, "Llamando: POST /ubicacion")
-                val resultado = ubicacionApi.saveUbicacion(ubicacion)
+                val resultado = ubicacionApi.createUbicacion(ubicacion)
                 Log.d(TAG, "Éxito: Ubicación guardada")
                 Result.success(resultado)
             } catch (e: Exception) {
@@ -264,17 +264,14 @@ class AlertasRepository {
     }
 }
 
-/**
- * ============================================================
- * REPOSITORY REMOTO - CLIMA
- * ============================================================
- */
+// WeatherRepository comentado temporalmente - requiere WeatherApi y WeatherDto
+/*
 class WeatherRepository {
     private val weatherApi: WeatherApi by lazy {
         RetrofitInstance.getWeatherApi(WeatherApi::class.java)
     }
     private val TAG = "WeatherRepository"
-    private val WEATHER_API_KEY = "tu_api_key_aqui"  // Reemplazar con tu API key
+    private val WEATHER_API_KEY = "tu_api_key_aqui"
 
     suspend fun getWeather(latitude: Double, longitude: Double): Result<WeatherDto> =
         withContext(Dispatchers.IO) {
@@ -294,4 +291,49 @@ class WeatherRepository {
             }
         }
 }
+*/
+
+/**
+ * Repository combinado para operaciones que requieren múltiples APIs
+ */
+class PacienteDataRepository {
+    private val vitalesRepository = VitalesRepository()
+    private val ubicacionRepository = UbicacionRepository()
+    private val alertasRepository = AlertasRepository()
+
+    suspend fun getPacienteCompleteData(pacienteId: String): Result<PacienteCompleteData> {
+        return try {
+            val vitalesResult = vitalesRepository.getByPaciente(pacienteId)
+            val ubicacionesResult = ubicacionRepository.getByPaciente(pacienteId)
+            val alertasResult = alertasRepository.getByPaciente(pacienteId)
+
+            if (vitalesResult.isSuccess && ubicacionesResult.isSuccess && alertasResult.isSuccess) {
+                Result.success(
+                    PacienteCompleteData(
+                        vitales = vitalesResult.getOrNull() ?: emptyList(),
+                        ubicaciones = ubicacionesResult.getOrNull() ?: emptyList(),
+                        alertas = alertasResult.getOrNull() ?: emptyList()
+                    )
+                )
+            } else {
+                val error = vitalesResult.exceptionOrNull()
+                    ?: ubicacionesResult.exceptionOrNull()
+                    ?: alertasResult.exceptionOrNull()
+                    ?: Exception("Error desconocido")
+                Result.failure(error)
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
+
+/**
+ * Clase que agrupa todos los datos de un paciente
+ */
+data class PacienteCompleteData(
+    val vitales: List<SignosVitalesDto>,
+    val ubicaciones: List<UbicacionDto>,
+    val alertas: List<AlertaDto>
+)
 

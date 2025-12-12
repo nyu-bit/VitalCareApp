@@ -32,6 +32,15 @@ interface UbicacionApi {
      */
     @POST("ubicacion")
     suspend fun createUbicacion(@Body ubicacion: UbicacionDto): UbicacionDto
+
+    /**
+     * Elimina un registro de ubicación
+     * DELETE /ubicacion/{id}
+     *
+     * @param id ID de la ubicación a eliminar
+     */
+    @DELETE("ubicacion/{id}")
+    suspend fun deleteUbicacion(@Path("id") id: String): Void?
 }
 
 /**

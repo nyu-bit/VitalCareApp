@@ -50,9 +50,7 @@ fun VitalCareNavigation() {
             // ========== RUTA: DASHBOARD ==========
             composable(route = "dashboard") {
                 DashboardScreen(
-                    onNavigateToAlertas = { navigateTo(navController, "alertas") },
-                    onNavigateToVitales = { navigateTo(navController, "vitales") },
-                    onNavigateToUbicacion = { navigateTo(navController, "ubicacion") }
+                    onNavigateToProfile = { /* No hacer nada por ahora */ }
                 )
             }
 

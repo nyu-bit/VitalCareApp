@@ -112,7 +112,7 @@ class AlertsViewModel : ViewModel() {
                     idRelacionado = idRelacionado
                 )
 
-                val result = alertasRepository.createAlerta(alertaDto)
+                val result = alertasRepository.create(alertaDto)
 
                 result.onSuccess { createdDto ->
                     val newAlert = Alert(
@@ -178,7 +178,7 @@ class AlertsViewModel : ViewModel() {
                     )
 
                     // Actualizar en la API
-                    val result = alertasRepository.markAsAttended(alertaDto)
+                    val result = alertasRepository.markAsAttended(alertId, alertaDto)
 
                     result.onSuccess {
                         // Actualizar estado local
@@ -226,7 +226,7 @@ class AlertsViewModel : ViewModel() {
     fun deleteAlerta(alertId: String) {
         viewModelScope.launch {
             try {
-                val result = alertasRepository.deleteAlerta(alertId)
+                val result = alertasRepository.delete(alertId)
 
                 result.onSuccess {
                     _uiState.update { state ->
