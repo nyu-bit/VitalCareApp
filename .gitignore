@@ -13,3 +13,10 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Local / tooling artifacts
+.kotlin/
+.tmp/
+
+# Guia_GeneracionAPK.md (SEGURIDAD): nunca subir keystores al repositorio
+*.jks

@@ -12,7 +12,6 @@ import cl.duoc.app.data.repository.CitaRepository
 import cl.duoc.app.data.repository.EspecialidadRepository
 import cl.duoc.app.data.repository.PacienteRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SortedStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 

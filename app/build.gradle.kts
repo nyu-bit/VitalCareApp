@@ -9,6 +9,16 @@ android {
     namespace = "cl.duoc.app"
     compileSdk = 36
 
+    // Guia_GeneracionAPK.md (PASO 3): configuración de firmado usando variables de entorno
+    signingConfigs {
+        create("release") {
+            storeFile = file(System.getenv("RELEASE_STORE_FILE") ?: "vitalcare.jks")
+            storePassword = System.getenv("RELEASE_STORE_PASSWORD")
+            keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+            keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+        }
+    }
+
     defaultConfig {
         applicationId = "cl.duoc.app"
         minSdk = 24
@@ -20,17 +30,27 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Guia_GeneracionAPK.md (PASO 1.2): debug para desarrollo
+            isDebuggable = true
+        }
         release {
-            isMinifyEnabled = false
+            // Guia_GeneracionAPK.md (PASO 1.2 / PASO 6): optimización y reducción de tamaño
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            // Guia_GeneracionAPK.md (PASO 1.2 / PASO 3): firma para release
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     composeOptions {
@@ -53,6 +73,14 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
+
+    // Unit testing
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+    testImplementation("androidx.test:core-ktx:1.6.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("com.google.truth:truth:1.4.4")
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
@@ -85,4 +113,10 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+
+    // Retrofit + OkHttp (ver Integracion_Backend.md, sección 4.1)
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 }
